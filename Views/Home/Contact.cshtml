@@ -1,0 +1,90 @@
+<section class="py-5">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-primary">Contact Us</h1>
+            <p class="text-muted col-md-8 mx-auto">
+                Send us a message and optionally share your location for faster support.
+            </p>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- Contact Form -->
+            <div class="col-md-7">
+                <div class="p-4 border rounded">
+
+                    <form method="post" asp-action="Contact">
+
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="Name" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="Email" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="Message" class="form-control" rows="4" required></textarea>
+                        </div>
+
+                        <!-- GPS Location -->
+                        <div class="mb-3">
+                            <label class="form-label">Your Location (optional)</label>
+                            <input type="text" id="locationInput" name="Location" class="form-control mb-2"
+                                   placeholder="Click detect to autofill" readonly />
+                            
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="getLocation()">
+                                Detect My Location
+                            </button>
+                        </div>
+
+                        <!-- Hidden coordinates -->
+                        <input type="hidden" id="latitude" name="Latitude" />
+                        <input type="hidden" id="longitude" name="Longitude" />
+
+                        <button type="submit" class="btn btn-primary px-4">
+                            Send Message
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- Contact Info + Map -->
+            <div class="col-md-5">
+                <div class="p-4 border rounded h-100">
+
+                    <h5 class="fw-bold mb-3">Get in touch</h5>
+                    <p class="text-muted">
+                        Share your location so we can better assist you.
+                    </p>
+
+                    <hr />
+
+                    <p class="mb-2"><strong>Email:</strong></p>
+                    <p class="text-muted">support@yourcrm.com</p>
+
+                    <p class="mb-2"><strong>Phone:</strong></p>
+                    <p class="text-muted">+251 900 000 000</p>
+
+                    <p class="mb-2"><strong>Location:</strong></p>
+                    <p class="text-muted">Hawassa, Ethiopia</p>
+
+                    <!-- Map Preview -->
+                    <iframe id="mapFrame" class="w-100 mt-3 rounded" height="250"
+                            src="https://maps.google.com/maps?q=Hawassa&t=&z=13&ie=UTF8&iwloc=&output=embed">
+                    </iframe>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>

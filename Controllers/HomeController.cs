@@ -1,6 +1,6 @@
-using System.Diagnostics;
+
 using Microsoft.AspNetCore.Mvc;
-using FanaCRM.Models;
+
 
 namespace FanaCRM.Controllers;
 
@@ -11,14 +11,29 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Privacy()
+    public IActionResult About()
     {
         return View();
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+
+    public IActionResult Services()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View();
     }
+    public IActionResult Contact()
+    {
+        return View();
+    }
+    [HttpPost]
+    public IActionResult Contact(string Name, string Email, string Message, string Location, string Latitude, string Longitude)
+    {
+        // You now have GPS data
+        // Save to DB or process it
+
+        TempData["Success"] = "Message sent successfully!";
+        return RedirectToAction("Contact");
+    }
+
+
 }

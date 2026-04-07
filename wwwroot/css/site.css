@@ -55,5 +55,13 @@ body {
 .border:hover {
   transform: translateY(-4px);
   transition: 0.2s ease;
-  border:2px 4px 6px rgba(0, 0, 0, 0.651)
+  border: 2px 4px 6px rgba(0, 0, 0, 0.651)
+}
+
+/* profile 
+ */
+
+.rounded-circle {
+  font-size: 18px;
+  text-transform: uppercase;
 }

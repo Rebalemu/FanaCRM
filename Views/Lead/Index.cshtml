@@ -1,0 +1,81 @@
+@model IEnumerable<Lead>
+
+@{
+    ViewData["Title"] = "Leads";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Leads Management</h3>
+        <a asp-action="Create" class="btn btn-primary">
+            + New Lead
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <table class="table table-hover table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Company</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Assigned</th>
+                        <th>Created</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+           
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.FullName</td>
+                                <td>@item.Company</td>
+                                <td>@item.Email</td>
+                                <td>@item.Phone</td>
+                                @* Use the Null-conditional operator (?) for safety *@
+                                <td>@(item.Source?.Name ?? "N/A")</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        @(item.Status?.Name ?? "New")
+                                    </span>
+                                </td>
+                                <td>@item.User?.UserName</td>
+                                <td>@item.CreatedDate.ToString("yyyy-MM-dd")</td>
+
+                                <td class="text-end">
+                                    <div class="w-75 btn-group">
+                                        <a asp-controller="Lead" asp-action="Edit" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Edit </a>
+                                        <a asp-controller="Lead" asp-action="Details" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-info"><i class="bi bi-eye-fill"></i>View</a>
+                                        <a asp-controller="Lead" asp-action="Delete" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-danger"> <i class="bi bi-trash-fill">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center">No leads found.</td>
+                        </tr>
+                    }
+                </tbody>
+
+                
+            </table>
+
+        </div>
+    </div>
+</div>

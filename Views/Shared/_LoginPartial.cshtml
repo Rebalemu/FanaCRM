@@ -1,25 +1,86 @@
-@using Microsoft.AspNetCore.Identity;
-@inject SignInManager<Users> signInManager;
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Users> signInManager
+@inject UserManager<Users> userManager
 
 <ul class="navbar-nav ms-auto align-items-center">
     @if (signInManager.IsSignedIn(User))
     {
-        <li class="nav-item">
-            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-link nav-link text-dark p-0">Logout</button>
-            </form>
+        var user = await userManager.GetUserAsync(User);
+        var firstLetter = user?.UserName?.Substring(0, 1).ToUpper();
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+
+                <!-- Circle Avatar -->
+                <div class="rounded-circle bg-light text-dark d-flex justify-content-center align-items-center"
+                     style="width:40px;height:40px;font-weight:bold;">
+                    @firstLetter
+                </div>
+            </a>
+
+            <!-- Dropdown -->
+            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="profileDropdown" style="min-width:250px;">
+            
+                <!-- User Info -->
+                <li class="mb-2">
+                    <strong>@user.FullName</strong><br />
+                    <small>@user.Email</small>
+                </li>
+
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+
+                <!-- Role-based content -->
+                @if (User.IsInRole("Admin"))
+                {
+                    <li>
+                        <a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">
+                            Admin Dashboard
+                        </a>
+                    </li>
+                }
+                else if (User.IsInRole("User"))
+                {
+                    <li>
+                        <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                            User Dashboard
+                        </a>
+                    </li>
+                }
+
+                @* <li>
+                    <a class="dropdown-item" asp-controller="Orders" asp-action="Index">
+                        My Orders
+                    </a>
+                </li> *@
+
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+
+                <!-- Logout -->
+                <li>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item text-danger">
+                            Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
         </li>
     }
     else
     {
-        <li class="nav-item btn btn-primary ">
-            <a class="nav-link text-secondary text-white" asp-controller="Account" asp-action="Login">
+        <li class="nav-item btn btn-primary">
+            <a class="nav-link text-white" asp-controller="Account" asp-action="Login">
                 Login
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-secondary text-white" asp-controller="Account" asp-action="Register">
+            <a class="nav-link text-white" asp-controller="Account" asp-action="Register">
                 Register
             </a>
         </li>

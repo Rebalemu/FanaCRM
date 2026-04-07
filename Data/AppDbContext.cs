@@ -11,6 +11,10 @@ namespace FanaCRM.Data
         : base(options)
         {
         }
+        public DbSet<Users> users { get; set; }
+        public DbSet<Lead> Leads { get; set; }
+        public DbSet<LeadSource> LeadSources { get; set; }
+        public DbSet<LeadStatus> LeadStatuses { get; set; }
 
     }
 }

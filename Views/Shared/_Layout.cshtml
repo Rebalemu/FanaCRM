@@ -10,128 +10,129 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
     <link rel="stylesheet" href="~/FanaCRM.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css" rel="stylesheet">
-</head>
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css" rel="stylesheet">
+    </head>
 
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-primary border-bottom box-shadow mb-3">
-            <div class="container-fluid">
+    <body>
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-light bg-primary border-bottom box-shadow mb-3">
+                <div class="container-fluid">
 
-                <!-- LEFT: Brand -->
-                <a class="navbar-brand text-white" asp-area="" asp-controller="Home" asp-action="Index">
-                    FanaCRM
-                </a>
+                    <!-- LEFT: Brand -->
+                    <a class="navbar-brand text-white" asp-area="" asp-controller="Home" asp-action="Index">
+                        FanaCRM
+                    </a>
 
-                <!-- TOGGLER (for mobile) -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                    <!-- TOGGLER (for mobile) -->
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-                <!-- CENTER + RIGHT -->
-                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <!-- CENTER + RIGHT -->
+                    <div class="collapse navbar-collapse" id="mainNavbar">
 
-                    <!-- CENTER: Navigation -->
-                    <ul class="navbar-nav mx-auto">
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="About">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="Services">Service</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="Contact">Contact us</a>
-                        </li>
-                    </ul>
+                        <!-- CENTER: Navigation -->
+                        <ul class="navbar-nav mx-auto">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Home" asp-action="About">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Home" asp-action="Services">Service</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Home" asp-action="Contact">Contact us</a>
+                            </li>
+                        </ul>
 
-                    <!-- RIGHT: Buttons / Login -->
-                    <ul class="navbar-nav ms-auto">
-                        <partial name="_LoginPartial" />
-                    </ul>
+                        <!-- RIGHT: Buttons / Login -->
+                        <ul class="navbar-nav ms-auto">
+                            <partial name="_LoginPartial" />
+                        </ul>
 
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            <partial name="_Notification" />
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="footer-section mt-5 bg-light">
-        <div class="container py-5">
-            <div class="row">
-
-                <!-- Brand -->
-                <div class="col-md-4 mb-4">
-                    <h5 class="fw-bold">FanaCRM</h5>
-                    <p class="text-muted">
-                        A smart CRM platform to manage customers, track sales,
-                        and grow your business efficiently.
-                    </p>
-                </div>
-
-                <!-- Quick Links -->
-                <div class="col-md-2 mb-4">
-                    <h6 class="fw-semibold">Company</h6>
-                    <ul class="list-unstyled">
-                        <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li><a asp-controller="Home" asp-action="About">About</a></li>
-                        <li><a asp-controller="Home" asp-action="Services">Service</a></li>
-                        <li><a asp-controller="Home" asp-action="Contact">Contact us</a></li>
-                    </ul>
-                </div>
-
-                <!-- Features -->
-                <div class="col-md-3 mb-4">
-                    <h6 class="fw-semibold">Features</h6>
-                    <ul class="list-unstyled">
-                        <li>Lead Management</li>
-                        <li>Sales Pipeline</li>
-                        <li>Reports & Analytics</li>
-                        <li>Customer Insights</li>
-                    </ul>
-                </div>
-
-                <!-- Contact / Social -->
-                <div class="col-md-3 mb-4">
-                    <h6 class="fw-semibold">Contact</h6>
-                    <p class="mb-1 text-muted">Addis Ababa, Ethiopia</p>
-                    <p class="mb-1 text-muted">support@fanacrm.com</p>
-
-                    <div class="mt-3 ">
-                        <a href="#" class="me-2 social-icon"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="me-2 social-icon"><i class="bi bi-twitter"></i></a>
-                        <a href="#" class="me-2 social-icon"><i class="bi bi-linkedin"></i></a>
                     </div>
                 </div>
-
-            </div>
-
-            <hr />
-
-            <!-- Bottom -->
-            <div class="d-flex justify-content-between flex-column flex-md-row text-muted small">
-                <div>
-                    &copy; 2026 FanaCRM. All rights reserved.
-                </div>
-                <div>
-                    <a asp-controller="Home" asp-action="Privacy" class="me-3">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
+            </nav>
+        </header>
+        <div class="container">
+            <main role="main" class="pb-3">
+                <partial name="_Notification" />
+                @RenderBody()
+            </main>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+
+        <footer class="footer-section mt-5 bg-light">
+            <div class="container py-5">
+                <div class="row">
+
+                    <!-- Brand -->
+                    <div class="col-md-4 mb-4">
+                        <h5 class="fw-bold">FanaCRM</h5>
+                        <p class="text-muted">
+                            A smart CRM platform to manage customers, track sales,
+                            and grow your business efficiently.
+                        </p>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="col-md-2 mb-4">
+                        <h6 class="fw-semibold">Company</h6>
+                        <ul class="list-unstyled">
+                            <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                            <li><a asp-controller="Home" asp-action="About">About</a></li>
+                            <li><a asp-controller="Home" asp-action="Services">Service</a></li>
+                            <li><a asp-controller="Home" asp-action="Contact">Contact us</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="col-md-3 mb-4">
+                        <h6 class="fw-semibold">Features</h6>
+                        <ul class="list-unstyled">
+                            <li>Lead Management</li>
+                            <li>Sales Pipeline</li>
+                            <li>Reports & Analytics</li>
+                            <li>Customer Insights</li>
+                        </ul>
+                    </div>
+
+                    <!-- Contact / Social -->
+                    <div class="col-md-3 mb-4">
+                        <h6 class="fw-semibold">Contact</h6>
+                        <p class="mb-1 text-muted">Addis Ababa, Ethiopia</p>
+                        <p class="mb-1 text-muted">support@fanacrm.com</p>
+
+                        <div class="mt-3 ">
+                            <a href="#" class="me-2 social-icon"><i class="bi bi-facebook"></i></a>
+                            <a href="#" class="me-2 social-icon"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="me-2 social-icon"><i class="bi bi-linkedin"></i></a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <!-- Bottom -->
+                <div class="d-flex justify-content-between flex-column flex-md-row text-muted small">
+                    <div>
+                        &copy; 2026 FanaCRM. All rights reserved.
+                    </div>
+                    <div>
+                        <a asp-controller="Home" asp-action="Privacy" class="me-3">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
 
 </html>

@@ -20,7 +20,8 @@
             </a>
 
             <!-- Dropdown -->
-            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="profileDropdown" style="min-width:250px;">
+            <ul class="dropdown-menu dropdown-menu-end p-3 bg-light" aria-labelledby="profileDropdown"
+                style="min-width:250px;z-index:9999;">
             
                 <!-- User Info -->
                 <li class="mb-2">
@@ -36,7 +37,7 @@
                 @if (User.IsInRole("Admin"))
                 {
                     <li>
-                        <a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">
+                        <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
                             Admin Dashboard
                         </a>
                     </li>

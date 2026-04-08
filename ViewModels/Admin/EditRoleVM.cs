@@ -7,5 +7,5 @@ public class EditRoleVM
 
     public List<string> SelectedRoles { get; set; } = new List<string>();
 
-    public List<SelectListItem> Roles { get; set; }
+    public List<SelectListItem> Roles { get; set; } = new List<SelectListItem>(); // ✅ FIX
 }

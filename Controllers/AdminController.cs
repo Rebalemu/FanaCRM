@@ -41,18 +41,23 @@ namespace FanaCRM.Controllers
                     Id = user.Id,
                     FullName = user.FullName,
                     Email = user.Email,
-                    Roles = roles.FirstOrDefault()
+                    Roles = roles.ToList()
                 });
             }
 
             return View(model);
         }
 
+        // GET EDIT
         public async Task<IActionResult> EditRole(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest();
+
             var user = await _userManager.FindByIdAsync(id);
 
-            if (user == null) return NotFound();
+            if (user == null)
+                return NotFound();
 
             var allRoles = _roleManager.Roles.ToList();
             var userRoles = await _userManager.GetRolesAsync(user);
@@ -61,7 +66,7 @@ namespace FanaCRM.Controllers
             {
                 UserId = user.Id,
                 Email = user.Email,
-                SelectedRoles = userRoles.ToList(), // ✅ multiple
+                SelectedRoles = userRoles.ToList(),
                 Roles = allRoles.Select(r => new SelectListItem
                 {
                     Value = r.Name,
@@ -71,27 +76,79 @@ namespace FanaCRM.Controllers
 
             return View(model);
         }
-        // ✅ POST: Edit Role
 
+        // POST EDIT
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditRole(EditRoleVM model)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
 
-            if (user == null) return NotFound();
+            if (user == null)
+                return NotFound();
+
+            model.SelectedRoles = model.SelectedRoles ?? new List<string>();
+
+            // ❌ No roles selected → return back to view
+            if (!model.SelectedRoles.Any())
+            {
+                model.SelectedRoles.Add("User"); // ✅ default role
+                TempData["Info"] = "Default Role Assigned ✅";
+
+                // reload roles (VERY IMPORTANT)
+                model.Roles = _roleManager.Roles.Select(r => new SelectListItem
+                {
+                    Value = r.Name,
+                    Text = r.Name
+                }).ToList();
+
+                return View(model);
+            }
 
             var currentRoles = await _userManager.GetRolesAsync(user);
 
-            // Remove roles not selected anymore
             var rolesToRemove = currentRoles.Except(model.SelectedRoles);
             await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
 
-            // Add new selected roles
             var rolesToAdd = model.SelectedRoles.Except(currentRoles);
             await _userManager.AddToRolesAsync(user, rolesToAdd);
 
-            return RedirectToAction("Index");
+            return RedirectToAction("UserList");
+        }
+        // POST Delete user
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest();
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            // Optional: prevent deleting yourself
+            var currentUserId = _userManager.GetUserId(User);
+            if (user.Id == currentUserId)
+            {
+                TempData["Error"] = "You cannot delete your own account!";
+                return RedirectToAction("UserList");
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+            {
+                TempData["Success"] = "User deleted successfully ✅";
+            }
+            else
+            {
+                TempData["Error"] = "Error deleting user ❌";
+            }
+
+            return RedirectToAction("UserList");
         }
     }
 }

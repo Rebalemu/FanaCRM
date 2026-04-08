@@ -83,6 +83,7 @@ namespace UserRoles.Controllers
                 await userManager.AddToRoleAsync(user, "User");
 
                 await signInManager.SignInAsync(user, isPersistent: false);
+                TempData["success"] = "User registered successfully";
                 return RedirectToAction("Login", "Account");
             }
 
@@ -144,7 +145,7 @@ namespace UserRoles.Controllers
 
             var user = await userManager.FindByNameAsync(model.Email);
 
-            if(user == null)
+            if (user == null)
             {
                 ModelState.AddModelError("", "User not found!");
                 return View(model);
@@ -158,7 +159,7 @@ namespace UserRoles.Controllers
             }
             else
             {
-                foreach(var error in result.Errors)
+                foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError("", error.Description);
                 }

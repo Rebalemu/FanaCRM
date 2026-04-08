@@ -5,59 +5,87 @@
     ViewData["Title"] = "Users";
 }
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 <div class="container p-3">
     <div class="row pt-4">
         <div class="col-6">
             <h2 class="text-primary">User List</h2>
         </div>
+        <div class="col-6 text-end">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> &nbsp; Create User
+            </a>
+        </div>
     </div>
 
     <br /><br />
 
-    <table class="table table-bordered table-striped" style="width:100%">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>FullName</th>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+    <!-- Card Wrapper -->
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Users</h5>
+        </div>
 
-        <tbody>
-            @foreach (var obj in Model)
-            {
-                <tr>
-                    <td width="30%">
-                        @obj.Id
-                    </td>
-                    <td width="30%">
-                        @obj.FullName
-                    </td>
+        <div class="card-body">
+            <table class="table table-bordered table-striped" style="width:100%">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>FullName</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-                    <td width="30%">
-                        @obj.Email
-                    </td>
+                <tbody>
+                    @foreach (var obj in Model)
+                    {
+                        <tr>
+                            <td width="30%">
+                                @obj.Id
+                            </td>
+                            <td width="30%">
+                                @obj.FullName
+                            </td>
 
-                    <td width="20%">
-                        @obj.Roles
-                    </td>
+                            <td width="30%">
+                                @obj.Email
+                            </td>
 
-                    <td>
-                        <div class="w-75 btn-group" role="group">
-                            <a asp-controller="Admin" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary mx-2">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </a>
+                            <td width="20%">
+                                @foreach (var role in obj.Roles)
+                                {
+                                    <span class="badge bg-success me-1">@role</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="w-75 btn-group" role="group">
+                                    <a asp-controller="Admin" asp-action="EditRole" asp-route-id="@obj.Id"
+                                           class="btn btn-primary mx-2">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
 
-                            <a asp-controller="Admin" asp-action="Delete" asp-route-id="@obj.Id"
-                                   class="btn btn-danger mx-2">
-                                <i class="bi bi-trash-fill"></i> Delete
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                                    <button type="button" class="btn btn-danger mx-2" data-bs-toggle="modal"
+                                            data-bs-target="#deleteUserModal-@obj.Id">
+                                        <i class="bi bi-trash-fill"></i> Delete
+                                    </button>
+                                </div>
+
+                                @await Html.PartialAsync("_DeleteUser", obj)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

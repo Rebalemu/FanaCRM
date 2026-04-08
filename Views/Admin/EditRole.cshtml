@@ -1,31 +1,37 @@
 @model EditRoleVM
 
-<h2>Edit User Roles</h2>
-
-<form asp-action="EditRole" method="post">
-    <input type="hidden" asp-for="UserId" />
-
-    <div class="mb-3">
-        <label>Email</label>
-        <input asp-for="Email" class="form-control" readonly />
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h2 class="mb-0">Edit User Roles</h2>
     </div>
 
-    <div class="mb-3">
-        <label>Select Roles</label>
+    <div class="card-body">
+        <form asp-action="EditRole" method="post">
+            <input type="hidden" asp-for="UserId" />
 
-        @foreach (var role in Model.Roles)
-        {
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@role.Value"
-                @(Model.SelectedRoles.Contains(role.Value) ? "checked" : "") />
-
-                <label class="form-check-label">
-                    @role.Text
-                </label>
+            <div class="mb-3">
+                <label>Email</label>
+                <input asp-for="Email" class="form-control" readonly />
             </div>
-        }
-    </div>
 
-    <button type="submit" class="btn btn-success">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
-</form>
+            <div class="mb-3">
+                <label>Select Roles</label>
+
+                @foreach (var role in Model.Roles)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@role.Value"
+                        @(Model.SelectedRoles.Contains(role.Value) ? "checked" : "") />
+
+                        <label class="form-check-label">
+                            @role.Text
+                        </label>
+                    </div>
+                }
+            </div>
+
+            <button type="submit" class="btn btn-success">Save</button>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+</div>

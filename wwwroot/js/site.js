@@ -31,3 +31,15 @@ function showPosition(position) {
 function showError(error) {
     alert("Unable to retrieve your location.");
 }
+document.addEventListener("DOMContentLoaded", function () {
+    var deleteModal = document.getElementById('deleteModal');
+
+    if (!deleteModal) return;
+
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var id = button.getAttribute('data-id');
+
+        document.getElementById('deleteId').value = id;
+    });
+});

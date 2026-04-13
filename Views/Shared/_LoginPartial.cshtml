@@ -42,7 +42,23 @@
                         </a>
                     </li>
                 }
-                else if (User.IsInRole("User"))
+                else if (User.IsInRole("Sales"))
+                {
+                    <li>
+                        <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                            Sales Dashboard
+                        </a>
+                    </li>
+                }
+                else if (User.IsInRole("Support"))
+                {
+                    <li>
+                        <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                            Support Dashboard
+                        </a>
+                    </li>
+                }
+                else
                 {
                     <li>
                         <a class="dropdown-item" asp-controller="Profile" asp-action="Index">

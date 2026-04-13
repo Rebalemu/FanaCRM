@@ -1,6 +1,8 @@
 using FanaCRM.Data;
 using FanaCRM.Models;
+using FanaCRM.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,178 +13,229 @@ namespace FanaCRM.Controllers
     public class LeadController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<Users> _userManager;
 
-        public LeadController(AppDbContext context)
+        public LeadController(AppDbContext context, UserManager<Users> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
-
-        // ✅ INDEX + FILTER BY STATUS
-        public async Task<IActionResult> Index(int? statusId)
+        public async Task<IActionResult> Index(string search, int? statusId)
         {
-            var leads = _context.Leads
+            var query = _context.Leads
                 .Include(l => l.Source)
                 .Include(l => l.Status)
                 .Include(l => l.User)
                 .AsQueryable();
 
+            // 🔐 ROLE-BASED FILTER (Sales only sees their leads)
+            if (User.IsInRole("Sales"))
+            {
+                var userId = _userManager.GetUserId(User);
+                query = query.Where(l => l.AssignedTo == userId);
+            }
+
+            // 🔎 SEARCH BY NAME
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(l => l.FullName.Contains(search));
+            }
+
+            // 🎯 FILTER BY STATUS
             if (statusId.HasValue)
             {
-                leads = leads.Where(l => l.StatusId == statusId);
+                query = query.Where(l => l.StatusId == statusId);
             }
 
-            ViewBag.StatusList = new SelectList(_context.LeadStatuses, "Id", "Name");
+            var leads = await query
+                .Select(l => new LeadIndexVM
+                {
+                    Id = l.Id,
+                    FullName = l.FullName,
+                    Email = l.Email,
+                    Phone = l.Phone,
+                    Company = l.Company,
 
-            return View(await leads.ToListAsync());
+                    Source = l.Source.Name,
+                    Status = l.Status.Name,
+
+                    AssignedTo = l.User != null ? l.User.FullName : "Unassigned",
+
+                    CreatedDate = l.CreatedDate
+                })
+                .ToListAsync();
+
+            return View(leads);
         }
 
-        // ✅ GET: CREATE
-        public IActionResult Create()
+        // GET create
+        public async Task<IActionResult> Create()
         {
-            LoadDropdowns();
-            return View();
-        }
+            var vm = new LeadCreateVM
+            {
+                Sources = await _context.LeadSources
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToListAsync(),
 
-        // ✅ POST: CREATE
+                Statuses = await _context.LeadStatuses
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToListAsync(),
+
+                Users = await _userManager.Users
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id,
+                        Text = x.FullName
+                    }).ToListAsync()
+            };
+
+            return View(vm);
+        }
+        // POST Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Lead lead)
+        public async Task<IActionResult> Create(LeadCreateVM vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                lead.CreatedDate = DateTime.Now;
+                // 🔥 RELOAD DROPDOWNS (VERY IMPORTANT)
+                vm.Sources = await _context.LeadSources
+                    .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+                    .ToListAsync();
 
-                _context.Leads.Add(lead);
-                await _context.SaveChangesAsync();
-                TempData["success"] = "Category created successfully";
-                return RedirectToAction(nameof(Index));
+                vm.Statuses = await _context.LeadStatuses
+                    .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+                    .ToListAsync();
+
+                vm.Users = await _userManager.Users
+                    .Select(x => new SelectListItem { Value = x.Id, Text = x.FullName })
+                    .ToListAsync();
+
+                return View(vm);
             }
-            LoadDropdowns();
 
-            return View(lead);
+            var lead = new Lead
+            {
+                FullName = vm.FullName,
+                Email = vm.Email,
+                Phone = vm.Phone,
+                Company = vm.Company,
+
+                SourceId = vm.SourceId,
+                StatusId = vm.StatusId == 0 ? 1 : vm.StatusId, // default = New
+
+                AssignedTo = string.IsNullOrEmpty(vm.AssignedTo) ? null : vm.AssignedTo,
+
+                CreatedDate = DateTime.Now
+            };
+            _context.Leads.Add(lead);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
-
-        // ✅ GET: EDIT
+        // GET: Lead/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var lead = await _context.Leads.FindAsync(id);
-            if (lead == null) return NotFound();
+            if (lead == null)
+                return NotFound();
 
-            LoadDropdowns();
-            return View(lead);
+            var vm = new LeadEditVM
+            {
+                Id = lead.Id,
+                FullName = lead.FullName,
+                Email = lead.Email,
+                Phone = lead.Phone,
+                Company = lead.Company,
+                SourceId = lead.SourceId,
+                StatusId = lead.StatusId,
+                AssignedTo = lead.AssignedTo,
+
+                Sources = await _context.LeadSources
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToListAsync(),
+
+                Statuses = await _context.LeadStatuses
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToListAsync(),
+
+                Users = await _userManager.Users
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id,
+                        Text = x.FullName
+                    }).ToListAsync()
+            };
+
+            return View(vm);
         }
-
-        // ✅ POST: EDIT
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Lead lead)
+        public async Task<IActionResult> Edit(LeadEditVM vm)
         {
-            if (id != lead.Id) return NotFound();
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(lead);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Leads.Any(e => e.Id == lead.Id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                TempData["success"] = "Category updated successfully";
-                return RedirectToAction(nameof(Index));
+                // reload dropdowns
+                vm.Sources = await _context.LeadSources
+                    .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+                    .ToListAsync();
+
+                vm.Statuses = await _context.LeadStatuses
+                    .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
+                    .ToListAsync();
+
+                vm.Users = await _userManager.Users
+                    .Select(x => new SelectListItem { Value = x.Id, Text = x.FullName })
+                    .ToListAsync();
+
+                return View(vm);
             }
 
-            LoadDropdowns();
-            return View(lead);
-        }
+            var lead = await _context.Leads.FindAsync(vm.Id);
+            if (lead == null)
+                return NotFound();
 
-        // ✅ DELETE
+            // update fields
+            lead.FullName = vm.FullName;
+            lead.Email = vm.Email;
+            lead.Phone = vm.Phone;
+            lead.Company = vm.Company;
+            lead.SourceId = vm.SourceId;
+            lead.StatusId = vm.StatusId;
+            lead.AssignedTo = string.IsNullOrEmpty(vm.AssignedTo) ? null : vm.AssignedTo;
+
+            _context.Update(lead);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var lead = await _context.Leads
-                .Include(l => l.Source)
-                .Include(l => l.Status)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (lead == null) return NotFound();
-
-            return View(lead);
-        }
-
-        // ✅ POST: DELETE CONFIRMED
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
             var lead = await _context.Leads.FindAsync(id);
+            if (lead == null)
+                return NotFound();
 
-            if (lead != null)
-            {
-                _context.Leads.Remove(lead);
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // ✅ CHANGE STATUS QUICK ACTION
-        [HttpPost]
-        public async Task<IActionResult> ChangeStatus(int id, int statusId)
-        {
-            var lead = await _context.Leads.FindAsync(id);
-
-            if (lead == null) return NotFound();
-
-            lead.StatusId = statusId;
+            _context.Leads.Remove(lead);
             await _context.SaveChangesAsync();
-            TempData["success"] = "Category deleted successfully";
+
+            TempData["Success"] = "Lead deleted successfully";
+
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ CONVERT LEAD → CUSTOMER (Basic Logic)
-        // public async Task<IActionResult> ConvertToCustomer(int id)
-        // {
-        //     var lead = await _context.Leads.FindAsync(id);
-
-        //     if (lead == null) return NotFound();
-
-        //     // 🔹 Example Customer Creation (you must create Customer model/table)
-        //     var customer = new Customer
-        //     {
-        //         FullName = lead.FullName,
-        //         Email = lead.Email,
-        //         Phone = lead.Phone,
-        //         Company = lead.Company,
-        //         CreatedDate = DateTime.Now
-        //     };
-
-        //     _context.Customers.Add(customer);
-
-        //     // Optional: update lead status to "Converted"
-        //     var convertedStatus = await _context.LeadStatuses
-        //         .FirstOrDefaultAsync(s => s.Name == "Converted");
-
-        //     if (convertedStatus != null)
-        //     {
-        //         lead.StatusId = convertedStatus.Id;
-        //     }
-
-        //     await _context.SaveChangesAsync();
-
-        //     return RedirectToAction(nameof(Index));
-        // }
-
-        // ✅ LOAD DROPDOWNS (REUSABLE)
-        private void LoadDropdowns()
-        {
-            ViewBag.SourceId = new SelectList(_context.LeadSources, "Id", "Name");
-            ViewBag.StatusId = new SelectList(_context.LeadStatuses, "Id", "Name");
-            ViewBag.Users = new SelectList(_context.Users, "Id", "UserName");
-        }
     }
 }

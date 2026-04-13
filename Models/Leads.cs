@@ -1,4 +1,3 @@
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,36 +5,39 @@ namespace FanaCRM.Models
 {
     public class Lead
     {
+        [Key]
         public int Id { get; set; }
+
         [Required]
         [StringLength(100)]
         public string FullName { get; set; }
+
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Phone]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [Required]
         public string Company { get; set; }
 
-        // 🔹 Foreign Key - LeadSource
-        [Display(Name = "Source")]
+        // 🔹 Source
         [Required]
+        [Display(Name = "Source")]
         public int SourceId { get; set; }
         public LeadSource Source { get; set; }
 
-        // 🔹 Foreign Key - LeadStatus
+        // 🔹 Status
         [Required]
         [Display(Name = "Status")]
         public int StatusId { get; set; }
         public LeadStatus Status { get; set; }
 
-        // 🔹 Assigned User (ASP.NET Identity)
+        // 🔹 Assigned User
         [Display(Name = "Assigned To")]
-        public string AssignedTo { get; set; }
+        public string? AssignedTo { get; set; }
 
-        [ForeignKey("AssignedTo")]
+        [ForeignKey(nameof(AssignedTo))]
         public Users User { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;

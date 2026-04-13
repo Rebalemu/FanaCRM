@@ -1,4 +1,5 @@
-@model IEnumerable<Lead>
+@using FanaCRM.ViewModels
+@model List<LeadIndexVM>
 
 @{
     ViewData["Title"] = "Leads";
@@ -8,14 +9,20 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Leads Management</h3>
-        <a asp-action="Create" class="btn btn-primary">
-            + New Lead
-        </a>
+        <a asp-action="Create" class="btn btn-primary">+ New Lead</a>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-body">
-
+            <form method="get" class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control"
+                           placeholder="Search by name..." />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary">Search</button>
+                </div>
+            </form>
             <table class="table table-hover table-striped align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -25,13 +32,12 @@
                         <th>Phone</th>
                         <th>Source</th>
                         <th>Status</th>
-                        <th>Assigned</th>
+                        <th>Assigned To</th>
                         <th>Created</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
 
-           
                 <tbody>
                     @if (Model != null && Model.Any())
                     {
@@ -40,26 +46,44 @@
                             <tr>
                                 <td>@item.FullName</td>
                                 <td>@item.Company</td>
-                                <td>@item.Email</td>
-                                <td>@item.Phone</td>
-                                @* Use the Null-conditional operator (?) for safety *@
-                                <td>@(item.Source?.Name ?? "N/A")</td>
                                 <td>
-                                    <span class="badge bg-info">
-                                        @(item.Status?.Name ?? "New")
-                                    </span>
+                                    @if (!string.IsNullOrEmpty(item.Email))
+                                    {
+                                        <a href="mailto:@item.Email">@item.Email</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
                                 </td>
-                                <td>@item.User?.UserName</td>
+                                <td>@item.Phone</td>
+                                <td>@item.Source </td>
+                                <td>
+                                    @{
+                                        var statusClass = item.Status switch
+                                        {
+                                            "New" => "bg-primary",
+                                            "Contacted" => "bg-warning",
+                                            "Qualified" => "bg-success",
+                                            "Lost" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @statusClass">@item.Status</span>
+                                </td>
+                                <td>
+                                    @(string.IsNullOrEmpty(item.AssignedTo) ? "Unassigned" : item.AssignedTo)
+                                </td>
                                 <td>@item.CreatedDate.ToString("yyyy-MM-dd")</td>
-
                                 <td class="text-end">
-                                    <div class="w-75 btn-group">
-                                        <a asp-controller="Lead" asp-action="Edit" asp-route-id="@item.Id"
-                                           class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Edit </a>
-                                        <a asp-controller="Lead" asp-action="Details" asp-route-id="@item.Id"
-                                           class="btn btn-sm btn-info"><i class="bi bi-eye-fill"></i>View</a>
-                                        <a asp-controller="Lead" asp-action="Delete" asp-route-id="@item.Id"
-                                           class="btn btn-sm btn-danger"> <i class="bi bi-trash-fill">Delete</a>
+                                    <div class="btn-group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning mx-1">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger mx-1" data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal" data-id="@item.Id">
+                                            <i class="bi bi-trash-fill"></i> Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -68,14 +92,17 @@
                     else
                     {
                         <tr>
-                            <td colspan="9" class="text-center">No leads found.</td>
+                            <td colspan="9" class="text-center text-muted">
+                                No leads found. Try adjusting your search.
+                            </td>
                         </tr>
                     }
                 </tbody>
-
-                
             </table>
-
         </div>
     </div>
 </div>
+
+
+
+@await Html.PartialAsync("_DeleteModal")

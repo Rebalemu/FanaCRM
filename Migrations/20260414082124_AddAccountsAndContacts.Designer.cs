@@ -4,6 +4,7 @@ using FanaCRM.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FanaCRM.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414082124_AddAccountsAndContacts")]
+    partial class AddAccountsAndContacts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,20 +35,19 @@ namespace FanaCRM.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Industry")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -176,266 +178,6 @@ namespace FanaCRM.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LeadStatuses");
-                });
-
-            modelBuilder.Entity("FanaCRM.Models.Opportunity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("AssignedTo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CloseDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ContactId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("StageId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssignedTo");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("ContactId");
-
-                    b.HasIndex("StageId");
-
-                    b.ToTable("Opportunities");
-                });
-
-            modelBuilder.Entity("FanaCRM.Models.OpportunityProduct", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OpportunityId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OpportunityId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("OpportunityProducts");
-                });
-
-            modelBuilder.Entity("FanaCRM.Models.OpportunityStage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Probability")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OpportunityStages");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Prospect",
-                            Probability = 10
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Qualified",
-                            Probability = 30
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Proposal",
-                            Probability = 60
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Negotiation",
-                            Probability = 80
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Won",
-                            Probability = 100
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "Lost",
-                            Probability = 0
-                        });
-                });
-
-            modelBuilder.Entity("FanaCRM.Models.Product", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Products");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "13-inch ultrabook, 16GB RAM, 512GB SSD",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Laptop - Dell XPS 13",
-                            Price = 1200.00m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Ryzen 5, 16GB RAM, 1TB SSD, GTX 1660",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Desktop PC - Custom Build",
-                            Price = 950.00m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Ergonomic wireless mouse",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Wireless Mouse - Logitech",
-                            Price = 25.50m
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "RGB backlit mechanical keyboard",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Mechanical Keyboard",
-                            Price = 75.00m
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Ultra HD IPS display",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "27-inch Monitor - 4K",
-                            Price = 300.00m
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Description = "Portable high-speed storage",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "External SSD 1TB",
-                            Price = 150.00m
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Description = "Multiport adapter with HDMI, USB 3.0",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "USB-C Hub",
-                            Price = 40.00m
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Description = "Surround sound headset with mic",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Gaming Headset",
-                            Price = 60.00m
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Description = "Full HD webcam for streaming and meetings",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Webcam HD 1080p",
-                            Price = 45.00m
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Description = "1-year subscription license",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Name = "Office Software License",
-                            Price = 120.00m
-                        });
                 });
 
             modelBuilder.Entity("FanaCRM.Models.Users", b =>
@@ -682,58 +424,6 @@ namespace FanaCRM.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FanaCRM.Models.Opportunity", b =>
-                {
-                    b.HasOne("FanaCRM.Models.Users", "User")
-                        .WithMany()
-                        .HasForeignKey("AssignedTo")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FanaCRM.Models.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FanaCRM.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId");
-
-                    b.HasOne("FanaCRM.Models.OpportunityStage", "Stage")
-                        .WithMany()
-                        .HasForeignKey("StageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("Stage");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("FanaCRM.Models.OpportunityProduct", b =>
-                {
-                    b.HasOne("FanaCRM.Models.Opportunity", "Opportunity")
-                        .WithMany("Products")
-                        .HasForeignKey("OpportunityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FanaCRM.Models.Product", "Product")
-                        .WithMany("OpportunityProducts")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Opportunity");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -798,16 +488,6 @@ namespace FanaCRM.Migrations
             modelBuilder.Entity("FanaCRM.Models.LeadStatus", b =>
                 {
                     b.Navigation("Leads");
-                });
-
-            modelBuilder.Entity("FanaCRM.Models.Opportunity", b =>
-                {
-                    b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("FanaCRM.Models.Product", b =>
-                {
-                    b.Navigation("OpportunityProducts");
                 });
 
             modelBuilder.Entity("FanaCRM.Models.Users", b =>

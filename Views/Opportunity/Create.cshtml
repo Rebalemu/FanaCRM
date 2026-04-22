@@ -1,0 +1,25 @@
+@model FanaCRM.ViewModels.OpportunityFormVM
+
+@{
+    ViewData["Title"] = "Create Opportunity";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5>Create Opportunity</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <partial name="_Form" model="Model" />
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    @await Html.PartialAsync("_OpportunityScripts", Model)
+}

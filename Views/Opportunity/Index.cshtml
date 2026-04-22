@@ -1,0 +1,87 @@
+@model List<FanaCRM.ViewModels.OpportunityIndexVM>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Opportunities</h3>
+        <a asp-action="Create" class="btn btn-primary">+ New</a>
+    </div>
+
+    <div class="card mb-3 p-3">
+        <form method="get" class="row g-2">
+            <div class="col-md-4">
+                <input name="search" class="form-control" placeholder="Search..." />
+            </div>
+
+            <div class="col-md-4">
+                <select name="stageId" asp-items="ViewBag.Stages" class="form-select">
+                    <option value="">All Stages</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-outline-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Company</th>
+                        <th>Stage</th>
+                        <th>Amount</th>
+                        <th>Close</th>
+                        <th>Assigned</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">
+                                No opportunities found
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.CompanyName</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        @item.StageName (@item.Probability%)
+                                    </span>
+                                </td>
+                                <td class="text-success">@item.Amount.ToString("N2")</td>
+                                <td>@(item.CloseDate?.ToString("MMM dd") ?? "-")</td>
+                                <td>@item.AssignedTo</td>
+                                <td class="text-end">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning mx-1">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info mx-1">
+                                        <i class="bi bi-eye-fill"></i> View
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger mx-1" data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal" data-id="@item.Id">
+                                        <i class="bi bi-trash-fill"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+@await Html.PartialAsync("_DeleteModal")

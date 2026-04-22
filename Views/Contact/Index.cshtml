@@ -1,0 +1,104 @@
+@using FanaCRM.ViewModels
+@model List<ContactIndexVM>
+
+@{
+    ViewData["Title"] = "Contacts";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Contact Management</h3>
+        <a asp-action="Create" class="btn btn-primary">+ New Contact</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- Search -->
+            <form method="get" class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control"
+                           placeholder="Search by name..." />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary">Search</button>
+                </div>
+            </form>
+
+            <!-- Table -->
+            <table class="table table-hover table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Position</th>
+                        <th>Company</th>
+                        <th>Created</th>
+                        
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.FullName</td>
+
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Email))
+                                    {
+                                        <a href="mailto:@item.Email">@item.Email</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+
+                                <td>@item.Phone</td>
+
+                                <td>
+                                    @(string.IsNullOrEmpty(item.Position) ? "N/A" : item.Position)
+                                </td>
+                                <td>@item.CompanyName</td>
+                                <td>@item.CreatedDate.ToString("yyyy-MM-dd")</td>
+
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning mx-1">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info mx-1">
+                                            <i class="bi bi-eye-fill"></i> View
+                                        </a>
+
+                                        <button type="button" class="btn btn-sm btn-danger mx-1" data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal" data-id="@item.Id">
+                                            <i class="bi bi-trash-fill"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                No contacts found. Try adjusting your search.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_DeleteModal")

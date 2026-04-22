@@ -1,0 +1,70 @@
+@model FanaCRM.ViewModels.OpportunityDetailsVM
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h3>@Model.Name</h3>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center p-3">
+                <h6>Amount</h6>
+                <h4 class="text-success">@Model.Amount.ToString("N2")</h4>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center p-3">
+                <h6>Stage</h6>
+                <span class="badge bg-primary">@Model.StageName (@Model.Probability%)</span>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center p-3">
+                <h6>Close</h6>
+                <strong>@(Model.CloseDate?.ToString("MMM dd, yyyy") ?? "N/A")</strong>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center p-3">
+                <h6>Assigned</h6>
+                <strong>@Model.AssignedTo</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3 p-3">
+        <p><strong>Company:</strong> @Model.CompanyName</p>
+        <p><strong>Contact:</strong> @(Model.ContactName ?? "No Contact")</p>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model.Products)
+            {
+                <tr>
+                    <td>@p.ProductName</td>
+                    <td>@p.Quantity</td>
+                    <td>@p.Price.ToString("N2")</td>
+                    <td>@p.Total.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

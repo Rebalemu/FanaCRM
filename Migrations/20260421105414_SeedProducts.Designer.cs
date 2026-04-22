@@ -4,6 +4,7 @@ using FanaCRM.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FanaCRM.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260421105414_SeedProducts")]
+    partial class SeedProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -330,9 +333,6 @@ namespace FanaCRM.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -351,7 +351,6 @@ namespace FanaCRM.Migrations
                             Id = 1,
                             Description = "13-inch ultrabook, 16GB RAM, 512GB SSD",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "Laptop - Dell XPS 13",
                             Price = 1200.00m
                         },
@@ -360,7 +359,6 @@ namespace FanaCRM.Migrations
                             Id = 2,
                             Description = "Ryzen 5, 16GB RAM, 1TB SSD, GTX 1660",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "Desktop PC - Custom Build",
                             Price = 950.00m
                         },
@@ -369,7 +367,6 @@ namespace FanaCRM.Migrations
                             Id = 3,
                             Description = "Ergonomic wireless mouse",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "Wireless Mouse - Logitech",
                             Price = 25.50m
                         },
@@ -378,7 +375,6 @@ namespace FanaCRM.Migrations
                             Id = 4,
                             Description = "RGB backlit mechanical keyboard",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "Mechanical Keyboard",
                             Price = 75.00m
                         },
@@ -387,7 +383,6 @@ namespace FanaCRM.Migrations
                             Id = 5,
                             Description = "Ultra HD IPS display",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "27-inch Monitor - 4K",
                             Price = 300.00m
                         },
@@ -396,7 +391,6 @@ namespace FanaCRM.Migrations
                             Id = 6,
                             Description = "Portable high-speed storage",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "External SSD 1TB",
                             Price = 150.00m
                         },
@@ -405,7 +399,6 @@ namespace FanaCRM.Migrations
                             Id = 7,
                             Description = "Multiport adapter with HDMI, USB 3.0",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "USB-C Hub",
                             Price = 40.00m
                         },
@@ -414,7 +407,6 @@ namespace FanaCRM.Migrations
                             Id = 8,
                             Description = "Surround sound headset with mic",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "Gaming Headset",
                             Price = 60.00m
                         },
@@ -423,7 +415,6 @@ namespace FanaCRM.Migrations
                             Id = 9,
                             Description = "Full HD webcam for streaming and meetings",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "Webcam HD 1080p",
                             Price = 45.00m
                         },
@@ -432,7 +423,6 @@ namespace FanaCRM.Migrations
                             Id = 10,
                             Description = "1-year subscription license",
                             IsActive = true,
-                            IsDeleted = false,
                             Name = "Office Software License",
                             Price = 120.00m
                         });

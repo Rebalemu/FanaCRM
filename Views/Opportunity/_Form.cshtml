@@ -1,0 +1,102 @@
+@model FanaCRM.ViewModels.OpportunityFormVM
+
+@Html.AntiForgeryToken()
+<input type="hidden" asp-for="Id" />
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<h6 class="fw-bold mb-3">Basic Information</h6>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="CompanyId"></label>
+        <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select">
+            <option value="">-- Select Company --</option>
+        </select>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="ContactId"></label>
+        <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select">
+            <option value="">-- Select Contact --</option>
+        </select>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="StageId"></label>
+        <select asp-for="StageId" asp-items="Model.Stages" class="form-select"></select>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="CloseDate"></label>
+        <input asp-for="CloseDate" type="date" class="form-control" />
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="AssignedTo"></label>
+        <select asp-for="AssignedTo" asp-items="Model.Users" class="form-select"></select>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<div class="d-flex justify-content-between mb-2">
+    <h6 class="fw-bold">Products</h6>
+    <button type="button" class="btn btn-success btn-sm" onclick="addRow()">+ Add</button>
+</div>
+
+<table class="table table-bordered" id="productsTable">
+    <thead class="table-light">
+        <tr>
+            <th>Product</th>
+            <th width="120">Qty</th>
+            <th width="150">Price</th>
+            <th width="150">Total</th>
+            <th width="80"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Products.Count; i++)
+        {
+            <tr>
+                <td>
+                    <select asp-for="Products[@i].ProductId" class="form-select product-select">
+
+                        <option value="">-- Select Product --</option>
+
+                        @foreach (var p in Model.ProductsData)
+                        {
+                            <option value="@p.Id" data-price="@p.Price" selected="@(Model.Products[@i].ProductId == p.Id)">
+                                @p.Name
+                            </option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <input asp-for="Products[@i].Quantity" class="form-control qty" />
+                </td>
+                <td>
+                    <input asp-for="Products[@i].Price" class="form-control price" />
+                </td>
+                <td class="row-total">@Model.Products[i].Total.ToString("N2")</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">X</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="text-end">
+    <h5>Total: <span id="totalAmount" class="text-success">0.00</span></h5>
+</div>
+
+<div class="mt-4 text-end">
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    <button class="btn btn-primary px-4">Save</button>
+</div>

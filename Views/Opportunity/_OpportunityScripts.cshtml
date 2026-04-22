@@ -1,0 +1,108 @@
+@model FanaCRM.ViewModels.OpportunityFormVM
+
+<script>
+    // =========================
+    // PRODUCT OPTIONS (WITH PRICE)
+    // =========================
+    let productOptions = `@Html.Raw(string.Join("", Model.ProductsData.Select(p =>
+                $"<option value='{p.Id}' data-price='{p.Price}'>{p.Name}</option>"
+        )))`;
+
+    // =========================
+    // ADD ROW
+    // =========================
+    function addRow() {
+        let index = $('#productsTable tbody tr').length;
+
+        let row = `
+        <tr>
+            <td>
+                <select name="Products[${index}].ProductId"
+                        class="form-select product-select">
+                    <option value="">-- Select Product --</option>
+                    ${productOptions}
+                </select>
+            </td>
+
+            <td>
+                <input name="Products[${index}].Quantity"
+                       class="form-control qty"
+                       value="1" />
+            </td>
+
+            <td>
+                <input name="Products[${index}].Price"
+                       class="form-control price"
+                       value="0" />
+            </td>
+
+            <td class="row-total">0.00</td>
+
+            <td>
+                <button type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="removeRow(this)">
+                    X
+                </button>
+            </td>
+        </tr>`;
+
+        $('#productsTable tbody').append(row);
+    }
+
+    // =========================
+    // REMOVE ROW
+    // =========================
+    function removeRow(btn) {
+        $(btn).closest('tr').remove();
+        calculateTotal();
+    }
+
+    // =========================
+    // PRODUCT CHANGE → AUTO PRICE
+    // =========================
+    $(document).on('change', '.product-select', function () {
+        let row = $(this).closest('tr');
+
+        let price = $(this).find(':selected').data('price') || 0;
+
+        row.find('.price').val(price).trigger('input');
+    });
+
+    // =========================
+    // QTY / PRICE CHANGE → ROW TOTAL
+    // =========================
+    $(document).on('input', '.qty, .price', function () {
+        let row = $(this).closest('tr');
+
+        let qty = parseFloat(row.find('.qty').val()) || 0;
+        let price = parseFloat(row.find('.price').val()) || 0;
+
+        let total = qty * price;
+
+        row.find('.row-total').text(total.toFixed(2));
+
+        calculateTotal();
+    });
+
+    // =========================
+    // GRAND TOTAL
+    // =========================
+    function calculateTotal() {
+        let total = 0;
+
+        $('.row-total').each(function () {
+            total += parseFloat($(this).text()) || 0;
+        });
+
+        $('#totalAmount').text(total.toFixed(2));
+    }
+
+    // =========================
+    // INIT
+    // =========================
+    $(document).ready(function () {
+        calculateTotal();
+    });
+
+</script>

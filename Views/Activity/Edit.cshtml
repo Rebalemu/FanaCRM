@@ -1,0 +1,75 @@
+@model FanaCRM.ViewModels.ActivityFormVM
+
+@{
+    ViewData["Title"] = "Edit Activity";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-warning text-dark">
+            <h5>Edit Activity</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+
+                <input type="hidden" asp-for="Id" />
+
+                <!-- SAME FIELDS AS CREATE -->
+                <!-- (copy paste from Create view) -->
+
+                <!-- Type -->
+                <div class="mb-3">
+                    <label asp-for="TypeId"></label>
+                    <select asp-for="TypeId" asp-items="Model.Types" class="form-select"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Subject"></label>
+                    <input asp-for="Subject" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description"></label>
+                    <textarea asp-for="Description" class="form-control"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CompanyId"></label>
+                    <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ContactId"></label>
+                    <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AssignedTo"></label>
+                    <select asp-for="AssignedTo" asp-items="Model.Users" class="form-select"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DueDate"></label>
+                    <input asp-for="DueDate" type="date" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Status"></label>
+                    <select asp-for="Status" class="form-select">
+                        <option>Open</option>
+                        <option>Completed</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">Back</a>
+                    <button class="btn btn-warning">Update</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

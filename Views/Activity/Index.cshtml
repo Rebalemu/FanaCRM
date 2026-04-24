@@ -1,0 +1,106 @@
+@model List<FanaCRM.ViewModels.ActivityIndexVM>
+
+@{
+    ViewData["Title"] = "Activities";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Activity Management</h3>
+        <a asp-action="Create" class="btn btn-primary">+ New Activity</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- Search -->
+            <form method="get" class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control"
+                           placeholder="Search by subject..." />
+                </div>
+
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="Open">Open</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-outline-primary">Search</button>
+                </div>
+            </form>
+
+            <!-- Table -->
+            <table class="table table-hover table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Subject</th>
+                        <th>Type</th>
+                        <th>Company</th>
+                        <th>Contact</th>
+                        <th>Assigned To</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Subject</td>
+                                <td>@item.TypeName</td>
+                                <td>@(item.CompanyName ?? "N/A")</td>
+                                <td>@(item.ContactName ?? "N/A")</td>
+                                <td>@item.AssignedTo</td>
+                                <td>@(item.DueDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                                <td>
+                                    <span
+                                        class="badge bg-@(item.Status == "Open" ? "primary" : item.Status == "Completed" ? "success" : "danger")">
+                                        @item.Status
+                                    </span>
+                                </td>
+
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning mx-1">
+                                            <i class="bi bi-pencil-square"></i>Edit
+                                        </a>
+
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info mx-1">
+                                            <i class="bi bi-eye-fill"></i>View
+                                        </a>
+
+                                        <button class="btn btn-sm btn-danger mx-1" data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal" data-id="@item.Id">
+                                            <i class="bi bi-trash-fill"></i>Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">
+                                No activities found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_DeleteModal")

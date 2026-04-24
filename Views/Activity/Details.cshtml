@@ -1,0 +1,56 @@
+@model FanaCRM.ViewModels.ActivityDetailsVM
+
+@{
+    ViewData["Title"] = "Activity Details";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-info text-white">
+            <h5>Activity Details</h5>
+        </div>
+
+        <div class="card-body">
+
+            <dl class="row">
+
+                <dt class="col-sm-3">Subject</dt>
+                <dd class="col-sm-9">@Model.Subject</dd>
+
+                <dt class="col-sm-3">Type</dt>
+                <dd class="col-sm-9">@Model.TypeName</dd>
+
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">@Model.Description</dd>
+
+                <dt class="col-sm-3">Company</dt>
+                <dd class="col-sm-9">@Model.CompanyName</dd>
+
+                <dt class="col-sm-3">Contact</dt>
+                <dd class="col-sm-9">@Model.ContactName</dd>
+
+                <dt class="col-sm-3">Assigned To</dt>
+                <dd class="col-sm-9">@Model.AssignedTo</dd>
+
+                <dt class="col-sm-3">Due Date</dt>
+                <dd class="col-sm-9">@Model.DueDate?.ToString("yyyy-MM-dd")</dd>
+
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-primary">@Model.Status</span>
+                </dd>
+
+                <dt class="col-sm-3">Created</dt>
+                <dd class="col-sm-9">@Model.CreatedDate.ToString("yyyy-MM-dd")</dd>
+
+            </dl>
+
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Back</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+            </div>
+
+        </div>
+    </div>
+</div>

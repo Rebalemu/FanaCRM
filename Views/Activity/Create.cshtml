@@ -1,0 +1,89 @@
+@model FanaCRM.ViewModels.ActivityFormVM
+
+@{
+    ViewData["Title"] = "Create Activity";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-primary text-white">
+            <h5>Create Activity</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+
+                <!-- Type -->
+                <div class="mb-3">
+                    <label asp-for="TypeId" class="form-label"></label>
+                    <select asp-for="TypeId" asp-items="Model.Types" class="form-select">
+                        <option value="">-- Select Type --</option>
+                    </select>
+                </div>
+
+                <!-- Subject -->
+                <div class="mb-3">
+                    <label asp-for="Subject"></label>
+                    <input asp-for="Subject" class="form-control" />
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <label asp-for="Description"></label>
+                    <textarea asp-for="Description" class="form-control"></textarea>
+                </div>
+
+                <!-- Company -->
+                <div class="mb-3">
+                    <label asp-for="CompanyId"></label>
+                    <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select">
+                        <option value="">-- Select Company --</option>
+                    </select>
+                </div>
+
+                <!-- Contact -->
+                <div class="mb-3">
+                    <label asp-for="ContactId"></label>
+                    <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select">
+                        <option value="">-- Select Contact --</option>
+                    </select>
+                </div>
+
+                <!-- Assigned -->
+                <div class="mb-3">
+                    <label asp-for="AssignedTo"></label>
+                    <select asp-for="AssignedTo" asp-items="Model.Users" class="form-select">
+                        <option value="">-- Select User --</option>
+                    </select>
+                </div>
+
+                <!-- Due Date -->
+                <div class="mb-3">
+                    <label asp-for="DueDate"></label>
+                    <input asp-for="DueDate" type="date" class="form-control" />
+                </div>
+
+                <!-- Status -->
+                <div class="mb-3">
+                    <label asp-for="Status"></label>
+                    <select asp-for="Status" class="form-select">
+                        <option value="Open">Open</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">Back</a>
+                    <button class="btn btn-primary">Save</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

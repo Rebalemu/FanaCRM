@@ -4,6 +4,7 @@ using FanaCRM.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FanaCRM.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260424082707_UpdateActivityTable")]
+    partial class UpdateActivityTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,28 +95,6 @@ namespace FanaCRM.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ActivityTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Call"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Meeting"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Email"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Task"
-                        });
                 });
 
             modelBuilder.Entity("FanaCRM.Models.Company", b =>

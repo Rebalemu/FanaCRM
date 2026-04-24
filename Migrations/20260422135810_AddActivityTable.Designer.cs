@@ -4,6 +4,7 @@ using FanaCRM.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FanaCRM.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260422135810_AddActivityTable")]
+    partial class AddActivityTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,12 +33,12 @@ namespace FanaCRM.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
                     b.Property<string>("AssignedTo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int?>("CompanyId")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ContactId")
                         .HasColumnType("int");
@@ -63,15 +66,18 @@ namespace FanaCRM.Migrations
                     b.Property<int>("TypeId")
                         .HasColumnType("int");
 
+                    b.Property<string>("UsersId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("AssignedTo");
-
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("AccountId");
 
                     b.HasIndex("ContactId");
 
                     b.HasIndex("TypeId");
+
+                    b.HasIndex("UsersId");
 
                     b.ToTable("Activities");
                 });
@@ -92,28 +98,6 @@ namespace FanaCRM.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ActivityTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Call"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Meeting"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Email"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Task"
-                        });
                 });
 
             modelBuilder.Entity("FanaCRM.Models.Company", b =>
@@ -742,15 +726,9 @@ namespace FanaCRM.Migrations
 
             modelBuilder.Entity("FanaCRM.Models.Activity", b =>
                 {
-                    b.HasOne("FanaCRM.Models.Users", "users")
+                    b.HasOne("FanaCRM.Models.Company", "Account")
                         .WithMany()
-                        .HasForeignKey("AssignedTo")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FanaCRM.Models.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId");
+                        .HasForeignKey("AccountId");
 
                     b.HasOne("FanaCRM.Models.Contact", "Contact")
                         .WithMany()
@@ -762,13 +740,17 @@ namespace FanaCRM.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Company");
+                    b.HasOne("FanaCRM.Models.Users", "Users")
+                        .WithMany()
+                        .HasForeignKey("UsersId");
+
+                    b.Navigation("Account");
 
                     b.Navigation("Contact");
 
                     b.Navigation("Type");
 
-                    b.Navigation("users");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("FanaCRM.Models.Contact", b =>

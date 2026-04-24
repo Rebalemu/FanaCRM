@@ -20,6 +20,8 @@ namespace FanaCRM.Data
         public DbSet<OpportunityProduct> OpportunityProducts { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<OpportunityStage> OpportunityStages { get; set; }
+        public DbSet<Activity> Activities { get; set; }
+        public DbSet<ActivityType> ActivityTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,6 +55,12 @@ namespace FanaCRM.Data
              );
             modelBuilder.Entity<Product>()
                     .HasQueryFilter(p => !p.IsDeleted);
+            modelBuilder.Entity<ActivityType>().HasData(
+                    new ActivityType { Id = 1, Name = "Call" },
+                    new ActivityType { Id = 2, Name = "Meeting" },
+                    new ActivityType { Id = 3, Name = "Email" },
+                    new ActivityType { Id = 4, Name = "Task" }
+                );
         }
 
     }

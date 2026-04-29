@@ -10,5 +10,7 @@ namespace FanaCRM.Models
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public ICollection<Lead> Leads { get; set; }
+        public ICollection<Opportunity> Opportunities { get; set; }
+        public ICollection<Activity> Activities { get; set; }
     }
 }

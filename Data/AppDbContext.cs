@@ -27,11 +27,86 @@ namespace FanaCRM.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // User - Lead/Opportunity/Activity relationships with Restrict delete behavior
+
+            modelBuilder.Entity<Lead>()
+                .HasOne(l => l.User)
+                .WithMany(u => u.Leads)
+                .HasForeignKey(l => l.AssignedTo)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Opportunity>()
+                .HasOne(o => o.User)
+                .WithMany(u => u.Opportunities)
+                .HasForeignKey(o => o.AssignedTo)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Activity>()
+                .HasOne(a => a.User)
+                .WithMany(u => u.Activities)
+                .HasForeignKey(a => a.AssignedTo)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Lead - LeadSource and LeadStatus relationships
+            modelBuilder.Entity<Lead>()
+                .HasOne(l => l.Source)
+                .WithMany(s => s.Leads)
+                .HasForeignKey(l => l.SourceId);
+
+            modelBuilder.Entity<Lead>()
+                .HasOne(l => l.Status)
+                .WithMany(s => s.Leads)
+                .HasForeignKey(l => l.StatusId);
+            // Company - Contact relationship    
+            modelBuilder.Entity<Opportunity>()
+                .HasOne(o => o.Company)
+                .WithMany(c => c.Opportunities)
+                .HasForeignKey(o => o.CompanyId);
+
+
             modelBuilder.Entity<Contact>()
-                .HasOne(c => c.Company)
-                .WithMany(a => a.Contacts)
-                .HasForeignKey(c => c.CompanyId)
+               .HasOne(c => c.Company)
+               .WithMany(a => a.Contacts)
+               .HasForeignKey(c => c.CompanyId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Opportunity>()
+                .HasOne(o => o.Stage)
+                .WithMany()
+                .HasForeignKey(o => o.StageId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //🔹 OpportunityProduct (CRITICAL)
+            modelBuilder.Entity<OpportunityProduct>()
+                .HasOne(op => op.Opportunity)
+                .WithMany(o => o.Products)
+                .HasForeignKey(op => op.OpportunityId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OpportunityProduct>()
+                .HasOne(op => op.Product)
+                .WithMany(p => p.OpportunityProducts)
+                .HasForeignKey(op => op.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+            // 🔹 Activity Relationships
+            modelBuilder.Entity<Activity>()
+                .HasOne(a => a.Type)
+                .WithMany(t => t.Activities)
+                .HasForeignKey(a => a.TypeId);
+
+            modelBuilder.Entity<Activity>()
+                .HasOne(a => a.Company)
+                .WithMany(c => c.Activities)
+                .HasForeignKey(a => a.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Activity>()
+                .HasOne(a => a.Contact)
+                .WithMany(c => c.Activities)
+                .HasForeignKey(a => a.ContactId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
 
             modelBuilder.Entity<OpportunityStage>().HasData(
                 new OpportunityStage { Id = 1, Name = "Prospect", Probability = 10 },

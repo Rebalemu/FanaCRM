@@ -12,13 +12,16 @@ namespace FanaCRM.Controllers
     [Authorize(Roles = "Admin,Sales")]
     public class LeadController : Controller
     {
+
         private readonly AppDbContext _context;
         private readonly UserManager<Users> _userManager;
+        private readonly ILeadService _leadService;
 
-        public LeadController(AppDbContext context, UserManager<Users> userManager)
+        public LeadController(AppDbContext context, UserManager<Users> userManager, ILeadService leadService)
         {
             _context = context;
             _userManager = userManager;
+            _leadService = leadService;
         }
         public async Task<IActionResult> Index(string search, int? statusId)
         {
@@ -235,6 +238,20 @@ namespace FanaCRM.Controllers
             TempData["Success"] = "Lead deleted successfully";
 
             return RedirectToAction(nameof(Index));
+        }
+        public async Task<IActionResult> Convert(int id)
+        {
+            try
+            {
+                var opportunityId = await _leadService.ConvertLeadAsync(id);
+
+                return RedirectToAction("Details", "Opportunity", new { id = opportunityId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index");
+            }
         }
 
     }

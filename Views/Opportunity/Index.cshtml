@@ -56,7 +56,20 @@
                                 <td>@item.Name</td>
                                 <td>@item.CompanyName</td>
                                 <td>
-                                    <span class="badge bg-info">
+                                    @{
+                                        var badgeClass = item.StageName switch
+                                        {
+                                            "Prospect" => "bg-secondary",
+                                            "Qualified" => "bg-info",
+                                            "Proposal" => "bg-primary",
+                                            "Negotiation" => "bg-warning",
+                                            "Won" => "bg-success",
+                                            "Lost" => "bg-danger",
+                                            _ => "bg-dark"
+                                        };
+                                    }
+
+                                    <span class="badge @badgeClass">
                                         @item.StageName (@item.Probability%)
                                     </span>
                                 </td>

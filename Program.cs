@@ -24,6 +24,7 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+builder.Services.AddScoped<ILeadService, LeadService>();
 
 var app = builder.Build();
 

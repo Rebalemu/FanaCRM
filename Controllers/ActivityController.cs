@@ -25,7 +25,7 @@ namespace FanaCRM.Controllers
                 .Include(a => a.Type)
                 .Include(a => a.Company)
                 .Include(a => a.Contact)
-                .Include(a => a.users)
+                .Include(a => a.User)
                 .AsQueryable();
 
             // Search
@@ -49,7 +49,7 @@ namespace FanaCRM.Controllers
                     TypeName = a.Type.Name,
                     CompanyName = a.Company != null ? a.Company.Name : null,
                     ContactName = a.Contact != null ? a.Contact.FullName : null,
-                    AssignedTo = a.users.FullName,
+                    AssignedTo = a.User.FullName,
                     DueDate = a.DueDate,
                     Status = a.Status
                 })
@@ -68,7 +68,7 @@ namespace FanaCRM.Controllers
                 .Include(a => a.Type)
                 .Include(a => a.Company)
                 .Include(a => a.Contact)
-                .Include(a => a.users)
+                .Include(a => a.User)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (activity == null) return NotFound();
@@ -81,7 +81,7 @@ namespace FanaCRM.Controllers
                 TypeName = activity.Type.Name,
                 CompanyName = activity.Company?.Name,
                 ContactName = activity.Contact != null ? activity.Contact.FullName : null,
-                AssignedTo = activity.users.FullName,
+                AssignedTo = activity.User.FullName,
                 DueDate = activity.DueDate,
                 Status = activity.Status,
                 CreatedDate = activity.CreatedDate

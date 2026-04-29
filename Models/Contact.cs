@@ -22,5 +22,8 @@ namespace FanaCRM.Models
         public string Phone { get; set; }
         public string? Position { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public ICollection<Opportunity> Opportunities { get; set; }
+        public ICollection<Activity> Activities { get; set; }
     }
 }

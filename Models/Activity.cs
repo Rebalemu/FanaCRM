@@ -36,7 +36,7 @@ namespace FanaCRM.Models
         public string AssignedTo { get; set; }
 
         [ForeignKey(nameof(AssignedTo))]
-        public Users users { get; set; }
+        public Users User { get; set; }
 
         [Display(Name = "Due Date")]
         public DateTime? DueDate { get; set; }

@@ -10,7 +10,7 @@ namespace FanaCRM.Models
 
         [Required]
         [StringLength(100)]
-        public  string FullName { get; set; }
+        public string FullName { get; set; }
 
         [EmailAddress]
         public string? Email { get; set; }
@@ -40,7 +40,13 @@ namespace FanaCRM.Models
         [ForeignKey(nameof(AssignedTo))]
         public Users User { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public bool IsConverted { get; set; } = false;
+
+        public DateTime? LastActivityDate { get; set; }
+        public DateTime? LastContactedDate { get; set; }
+
+
+        public ICollection<Activity> Activities { get; set; }
     }
 }

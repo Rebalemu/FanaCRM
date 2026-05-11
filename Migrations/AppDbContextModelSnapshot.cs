@@ -50,6 +50,9 @@ namespace FanaCRM.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("LeadId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -70,6 +73,8 @@ namespace FanaCRM.Migrations
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("ContactId");
+
+                    b.HasIndex("LeadId");
 
                     b.HasIndex("TypeId");
 
@@ -219,6 +224,12 @@ namespace FanaCRM.Migrations
                     b.Property<bool>("IsConverted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastActivityDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastContactedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
@@ -302,6 +313,10 @@ namespace FanaCRM.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("LossReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -360,10 +375,19 @@ namespace FanaCRM.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsWon")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
 
                     b.Property<int>("Probability")
                         .HasColumnType("int");
@@ -376,39 +400,92 @@ namespace FanaCRM.Migrations
                         new
                         {
                             Id = 1,
+                            IsClosed = false,
+                            IsWon = false,
                             Name = "Prospect",
+                            Order = 0,
                             Probability = 10
                         },
                         new
                         {
                             Id = 2,
+                            IsClosed = false,
+                            IsWon = false,
                             Name = "Qualified",
+                            Order = 0,
                             Probability = 30
                         },
                         new
                         {
                             Id = 3,
+                            IsClosed = false,
+                            IsWon = false,
                             Name = "Proposal",
+                            Order = 0,
                             Probability = 60
                         },
                         new
                         {
                             Id = 4,
+                            IsClosed = false,
+                            IsWon = false,
                             Name = "Negotiation",
+                            Order = 0,
                             Probability = 80
                         },
                         new
                         {
                             Id = 5,
+                            IsClosed = false,
+                            IsWon = false,
                             Name = "Won",
+                            Order = 0,
                             Probability = 100
                         },
                         new
                         {
                             Id = 6,
+                            IsClosed = false,
+                            IsWon = false,
                             Name = "Lost",
+                            Order = 0,
                             Probability = 0
                         });
+                });
+
+            modelBuilder.Entity("FanaCRM.Models.OpportunityStageHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ChangedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("EnteredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExitedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("OpportunityId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StageId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChangedByUserId");
+
+                    b.HasIndex("OpportunityId");
+
+                    b.HasIndex("StageId");
+
+                    b.ToTable("OpportunityStageHistories");
                 });
 
             modelBuilder.Entity("FanaCRM.Models.Product", b =>
@@ -761,6 +838,10 @@ namespace FanaCRM.Migrations
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("FanaCRM.Models.Lead", "Lead")
+                        .WithMany("Activities")
+                        .HasForeignKey("LeadId");
+
                     b.HasOne("FanaCRM.Models.ActivityType", "Type")
                         .WithMany("Activities")
                         .HasForeignKey("TypeId")
@@ -770,6 +851,8 @@ namespace FanaCRM.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("Contact");
+
+                    b.Navigation("Lead");
 
                     b.Navigation("Type");
 
@@ -865,6 +948,33 @@ namespace FanaCRM.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("FanaCRM.Models.OpportunityStageHistory", b =>
+                {
+                    b.HasOne("FanaCRM.Models.Users", "ChangedByUser")
+                        .WithMany()
+                        .HasForeignKey("ChangedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FanaCRM.Models.Opportunity", "Opportunity")
+                        .WithMany()
+                        .HasForeignKey("OpportunityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FanaCRM.Models.OpportunityStage", "Stage")
+                        .WithMany()
+                        .HasForeignKey("StageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChangedByUser");
+
+                    b.Navigation("Opportunity");
+
+                    b.Navigation("Stage");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -935,6 +1045,11 @@ namespace FanaCRM.Migrations
                     b.Navigation("Activities");
 
                     b.Navigation("Opportunities");
+                });
+
+            modelBuilder.Entity("FanaCRM.Models.Lead", b =>
+                {
+                    b.Navigation("Activities");
                 });
 
             modelBuilder.Entity("FanaCRM.Models.LeadSource", b =>

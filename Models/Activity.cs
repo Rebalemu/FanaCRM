@@ -46,5 +46,10 @@ namespace FanaCRM.Models
         public string Status { get; set; } // Open, Completed, Cancelled
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+        // 🔹 Related Lead
+        public int? LeadId { get; set; }
+
+        public Lead Lead { get; set; }
     }
 }

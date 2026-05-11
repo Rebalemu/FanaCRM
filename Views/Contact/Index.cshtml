@@ -3,102 +3,337 @@
 
 @{
     ViewData["Title"] = "Contacts";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
 
+    <!-- PAGE HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Contact Management</h3>
-        <a asp-action="Create" class="btn btn-primary">+ New Contact</a>
+        <div>
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-person-lines-fill"></i>
+                Contact Management
+            </h3>
+            <small class="text-muted">
+                Manage all CRM contacts in one place
+            </small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle"></i>
+            New Contact
+        </a>
     </div>
 
-    <div class="card shadow-sm">
+    <!-- CARD -->
+    <div class="card shadow border-0">
+
         <div class="card-body">
 
-            <!-- Search -->
-            <form method="get" class="row mb-3">
-                <div class="col-md-4">
-                    <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control"
-                           placeholder="Search by name..." />
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-outline-primary">Search</button>
-                </div>
-            </form>
+            <div class="table-responsive">
 
-            <!-- Table -->
-            <table class="table table-hover table-striped align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Position</th>
-                        <th>Company</th>
-                        <th>Created</th>
-                        
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
+                <table id="contactsTable" class="table table-hover table-striped align-middle w-100">
 
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var item in Model)
+                    <!-- HEADER -->
+                    <thead class="table-dark">
+
+                        <!-- FILTER HEADER -->
+                        <tr>
+
+                            <th>
+                                <input type="text" placeholder="Search Name"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <th>
+                                <input type="text" placeholder="Search Email"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <th>
+                                <input type="text" placeholder="Search Phone"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Positions</option>
+                                </select>
+                            </th>
+
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Companies</option>
+                                </select>
+                            </th>
+
+                            <th>
+                                <input type="text" placeholder="Created Date"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                        @* <!-- COLUMN HEADER -->
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Position</th>
+                            <th>Company</th>
+                            <th>Created</th>
+                            <th class="text-end">Actions</th>
+                        </tr> *@
+
+                    </thead>
+
+                    <!-- BODY -->
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <!-- FULL NAME -->
+                                    <td class="fw-semibold">
+                                        @item.FullName
+                                    </td>
+
+                                    <!-- EMAIL -->
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Email))
+                                        {
+                                            <a href="mailto:@item.Email" class="text-decoration-none">
+                                                @item.Email
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+
+                                    <!-- PHONE -->
+                                    <td>
+                                        @(string.IsNullOrEmpty(item.Phone)
+                                            ? "N/A"
+                                            : item.Phone)
+                                    </td>
+
+                                    <!-- POSITION -->
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Position))
+                                        {
+                                            <span class="badge bg-info">
+                                                @item.Position
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+
+                                    <!-- COMPANY -->
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            @item.CompanyName
+                                        </span>
+                                    </td>
+
+                                    <!-- CREATED -->
+                                    <td>
+                                        @item.CreatedDate.ToString("yyyy-MM-dd")
+                                    </td>
+
+                                    <!-- ACTIONS -->
+                                    <td class="text-end">
+
+                                        <div class="btn-group">
+
+                                            <!-- EDIT -->
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+
+                                            <!-- DETAILS -->
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+
+                                            <!-- DELETE -->
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                                    data-bs-target="#deleteModal" data-id="@item.Id">
+
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@item.FullName</td>
+                                <td colspan="7" class="text-center text-muted py-4">
 
-                                <td>
-                                    @if (!string.IsNullOrEmpty(item.Email))
-                                    {
-                                        <a href="mailto:@item.Email">@item.Email</a>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">N/A</span>
-                                    }
-                                </td>
+                                    No contacts found.
 
-                                <td>@item.Phone</td>
-
-                                <td>
-                                    @(string.IsNullOrEmpty(item.Position) ? "N/A" : item.Position)
-                                </td>
-                                <td>@item.CompanyName</td>
-                                <td>@item.CreatedDate.ToString("yyyy-MM-dd")</td>
-
-                                <td class="text-end">
-                                    <div class="btn-group">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning mx-1">
-                                            <i class="bi bi-pencil-square"></i> Edit
-                                        </a>
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info mx-1">
-                                            <i class="bi bi-eye-fill"></i> View
-                                        </a>
-
-                                        <button type="button" class="btn btn-sm btn-danger mx-1" data-bs-toggle="modal"
-                                                data-bs-target="#deleteModal" data-id="@item.Id">
-                                            <i class="bi bi-trash-fill"></i> Delete
-                                        </button>
-                                    </div>
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">
-                                No contacts found. Try adjusting your search.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
+
     </div>
+
 </div>
 
 @await Html.PartialAsync("_DeleteModal")
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            // INITIALIZE DATATABLE
+            var table = $('#contactsTable').DataTable({
+
+                responsive: true,
+                autoWidth: false,
+
+                pageLength: 10,
+
+                order: [[5, 'desc']],
+
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: 6
+                    }
+                ],
+
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Global Search..."
+                }
+
+            });
+
+            // COLUMN SEARCH
+            $('#contactsTable thead tr:eq(0) th').each(function (i) {
+
+                $('input', this).on('keyup change', function () {
+
+                    if (table.column(i).search() !== this.value) {
+
+                        table
+                            .column(i)
+                            .search(this.value)
+                            .draw();
+                    }
+
+                });
+
+                // DROPDOWN FILTER
+                $('select', this).on('change', function () {
+
+                    table
+                        .column(i)
+                        .search($(this).val())
+                        .draw();
+
+                });
+
+            });
+
+            // POPULATE DROPDOWNS
+            table.columns().every(function () {
+
+                var column = this;
+
+                // POSITION COLUMN
+                if (column.index() == 3) {
+
+                    var select = $('.searchable-dropdown').eq(0);
+
+                    var uniqueValues = [];
+
+                    column.data().each(function (d) {
+
+                        var text = $('<div>').html(d).text().trim();
+
+                        if (text !== '' &&
+                            text !== 'N/A' &&
+                            !uniqueValues.includes(text)) {
+
+                            uniqueValues.push(text);
+
+                            select.append(
+                                `<option value="${text}">${text}</option>`
+                            );
+                        }
+
+                    });
+
+                }
+
+                // COMPANY COLUMN
+                if (column.index() == 4) {
+
+                    var select = $('.searchable-dropdown').eq(1);
+
+                    var uniqueValues = [];
+
+                    column.data().each(function (d) {
+
+                        var text = $('<div>').html(d).text().trim();
+
+                        if (text !== '' &&
+                            !uniqueValues.includes(text)) {
+
+                            uniqueValues.push(text);
+
+                            select.append(
+                                `<option value="${text}">${text}</option>`
+                            );
+                        }
+
+                    });
+
+                }
+
+            });
+
+            // SELECT2 SEARCHABLE DROPDOWNS
+            $('.searchable-dropdown').select2({
+
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Select',
+                allowClear: true
+
+            });
+
+        });
+
+    </script>
+
+}

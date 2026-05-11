@@ -3,117 +3,439 @@
 
 @{
     ViewData["Title"] = "Leads";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
 
+    <!-- PAGE HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Leads Management</h3>
-        <a asp-action="Create" class="btn btn-primary">+ New Lead</a>
+
+        <div>
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-funnel-fill"></i>
+                Lead Management
+            </h3>
+
+            <small class="text-muted">
+                Manage all CRM leads and conversions
+            </small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+
+            <i class="bi bi-plus-circle"></i>
+            New Lead
+
+        </a>
+
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form method="get" class="row mb-3">
-                <div class="col-md-4">
-                    <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control"
-                           placeholder="Search by name..." />
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-outline-primary">Search</button>
-                </div>
-            </form>
-            <table class="table table-hover table-striped align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Name</th>
-                        <th>Company</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Source</th>
-                        <th>Status</th>
-                        <th>Assigned To</th>
-                        <th>Created</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
+    <!-- CARD -->
+    <div class="card shadow border-0">
 
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var item in Model)
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table id="leadTable" class="table table-hover table-striped align-middle w-100">
+
+                    <!-- TABLE HEADER -->
+                    <thead class="table-dark">
+
+                        <!-- FILTER ROW -->
+                        <tr>
+
+                            <!-- NAME -->
+                            <th>
+                                <input type="text" placeholder="Search Name"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- COMPANY -->
+                            <th>
+                                <input type="text" placeholder="Search Company"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- EMAIL -->
+                            <th>
+                                <input type="text" placeholder="Search Email"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- PHONE -->
+                            <th>
+                                <input type="text" placeholder="Search Phone"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- SOURCE -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Sources</option>
+                                </select>
+                            </th>
+
+                            <!-- STATUS -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Status</option>
+                                </select>
+                            </th>
+
+                            <!-- ASSIGNED -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Users</option>
+                                </select>
+                            </th>
+
+                            <!-- CREATED -->
+                            <th>
+                                <input type="text" placeholder="Created Date"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- ACTION -->
+                            <th>Actions</th>
+
+                        </tr>
+
+
+                    </thead>
+
+                    <!-- TABLE BODY -->
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
                         {
-                            <tr>
-                                <td>@item.FullName</td>
-                                <td>@item.Company</td>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(item.Email))
-                                    {
-                                        <a href="mailto:@item.Email">@item.Email</a>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">N/A</span>
-                                    }
-                                </td>
-                                <td>@item.Phone</td>
-                                <td>@item.Source </td>
-                                <td>
-                                    @{
-                                        var statusClass = item.Status switch
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <!-- FULL NAME -->
+                                    <td class="fw-semibold">
+                                        @item.FullName
+                                    </td>
+
+                                    <!-- COMPANY -->
+                                    <td>
+
+                                        @if (!string.IsNullOrEmpty(item.Company))
                                         {
-                                            "New" => "bg-primary",
-                                            "Contacted" => "bg-warning",
-                                            "Qualified" => "bg-success",
-                                            "Lost" => "bg-danger",
-                                            _ => "bg-secondary"
-                                        };
-                                    }
-                                    <span class="badge @statusClass">@item.Status</span>
-                                </td>
-                                <td>
-                                    @(string.IsNullOrEmpty(item.AssignedTo) ? "Unassigned" : item.AssignedTo)
-                                </td>
-                                <td>@item.CreatedDate.ToString("yyyy-MM-dd")</td>
-                                <td class="text-end">
-                                    <div class="btn-group">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning mx-1">
-                                            <i class="bi bi-pencil-square"></i> Edit
-                                        </a>
-                                        @if (item.Status == "Qualified")
+                                            <span class="badge bg-secondary">
+                                                @item.Company
+                                            </span>
+                                        }
+                                        else
                                         {
-                                            <a asp-action="Convert" asp-route-id="@item.Id" class="btn btn-success"
-                                                   onclick="return confirm('Convert this lead?');">
-                                                Convert
+                                            <span class="text-muted">
+                                                N/A
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- EMAIL -->
+                                    <td>
+
+                                        @if (!string.IsNullOrEmpty(item.Email))
+                                        {
+                                            <a href="mailto:@item.Email" class="text-decoration-none">
+
+                                                @item.Email
+
                                             </a>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-secondary" disabled>Convert</button>
+                                            <span class="text-muted">
+                                                N/A
+                                            </span>
                                         }
-                                        <button type="button" class="btn btn-sm btn-danger mx-1" data-bs-toggle="modal"
-                                                data-bs-target="#deleteModal" data-id="@item.Id">
-                                            <i class="bi bi-trash-fill"></i> Delete
-                                        </button>
-                                    </div>
+
+                                    </td>
+
+                                    <!-- PHONE -->
+                                    <td>
+
+                                        @(string.IsNullOrEmpty(item.Phone)
+                                            ? "N/A"
+                                            : item.Phone)
+
+                                    </td>
+
+                                    <!-- SOURCE -->
+                                    <td>
+
+                                        @if (!string.IsNullOrEmpty(item.Source))
+                                        {
+                                            <span class="badge bg-info">
+                                                @item.Source
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                N/A
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- STATUS -->
+                                    <td>
+
+                                        @{
+                                            var statusClass = item.Status switch
+                                            {
+                                                "New" => "bg-primary",
+                                                "Contacted" => "bg-warning",
+                                                "Qualified" => "bg-success",
+                                                "Lost" => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+
+                                        <span class="badge @statusClass">
+                                            @item.Status
+                                        </span>
+
+                                    </td>
+
+                                    <!-- ASSIGNED -->
+                                    <td>
+
+                                        @if (!string.IsNullOrEmpty(item.AssignedTo))
+                                        {
+                                            <span class="badge bg-dark">
+                                                @item.AssignedTo
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Unassigned
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- CREATED -->
+                                    <td>
+                                        @item.CreatedDate.ToString("yyyy-MM-dd")
+                                    </td>
+
+                                    <!-- ACTIONS -->
+                                    <td class="text-end">
+
+                                        <div class="btn-group">
+
+                                            <!-- EDIT -->
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+
+                                                <i class="bi bi-pencil-square"></i>Edit
+
+                                            </a>
+
+                                            <!-- CONVERT -->
+                                            @if (item.Status == "Qualified")
+                                            {
+                                                <a asp-action="Convert" asp-route-id="@item.Id" class="btn btn-sm btn-success"
+                                                       onclick="return confirm('Convert this lead?');">
+
+                                                    <i class="bi bi-arrow-repeat"></i> Convert
+
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-secondary" disabled>
+
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                    Convert
+
+                                                </button>
+                                            }
+
+                                            <!-- DELETE -->
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                                    data-bs-target="#deleteModal" data-id="@item.Id">
+
+                                                <i class="bi bi-trash-fill"></i>Delete
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="9" class="text-center text-muted py-4">
+
+                                    No leads found.
+
                                 </td>
+
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="9" class="text-center text-muted">
-                                No leads found. Try adjusting your search.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         </div>
+
     </div>
+
 </div>
 
-
-
 @await Html.PartialAsync("_DeleteModal")
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            // SELECT2
+            $('.searchable-dropdown').select2({
+
+                theme: 'bootstrap-5',
+
+                width: '100%',
+
+                placeholder: 'Select',
+
+                allowClear: true
+
+            });
+
+            // DATATABLE
+            var table = $('#leadTable').DataTable({
+
+                responsive: true,
+
+                autoWidth: false,
+
+                orderCellsTop: true,
+
+                fixedHeader: true,
+
+                pageLength: 10,
+
+                order: [[7, 'desc']],
+
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: 8
+                    }
+                ],
+
+                language: {
+
+                    search: "_INPUT_",
+
+                    searchPlaceholder: "Global Search..."
+
+                },
+
+                initComplete: function () {
+
+                    var api = this.api();
+
+                    // SOURCE
+                    createDropdownFilter(api, 4);
+
+                    // STATUS
+                    createDropdownFilter(api, 5);
+
+                    // ASSIGNED
+                    createDropdownFilter(api, 6);
+
+                }
+
+            });
+
+            // =====================================
+            // TEXT FILTERS
+            // =====================================
+
+            $('#leadTable thead tr:eq(0) th').each(function (i) {
+
+                var input = $(this).find('input');
+
+                if (input.length > 0) {
+
+                    $(input).on('keyup change', function () {
+
+                        if (table.column(i).search() !== this.value) {
+
+                            table
+                                .column(i)
+                                .search(this.value)
+                                .draw();
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+            // =====================================
+            // DROPDOWN FILTERS
+            // =====================================
+
+            function createDropdownFilter(api, columnIndex) {
+
+                var column = api.column(columnIndex);
+
+                var select = $('#leadTable thead tr:eq(0) th')
+                    .eq(columnIndex)
+                    .find('select');
+
+                // UNIQUE VALUES
+                column.data().unique().sort().each(function (d) {
+
+                    var text = $('<div>').html(d).text().trim();
+
+                    if (text !== '') {
+
+                        select.append(
+                            `<option value="${text}">${text}</option>`
+                        );
+
+                    }
+
+                });
+
+                // FILTER EVENT
+                select.on('change', function () {
+
+                    var value = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                    column
+                        .search(value ? '^' + value + '$' : '', true, false)
+                        .draw();
+
+                });
+
+            }
+
+        });
+
+    </script>
+
+}

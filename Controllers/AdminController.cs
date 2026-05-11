@@ -1,32 +1,36 @@
-
 using FanaCRM.Models;
+using FanaCRM.Services;
 using FanaCRM.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-
 namespace FanaCRM.Controllers
 {
-
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly UserManager<Users> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IDashboardService _dashboardService;
 
-        public AdminController(UserManager<Users> userManager,
-                               RoleManager<IdentityRole> roleManager)
+        public AdminController(
+            UserManager<Users> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IDashboardService dashboardService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _dashboardService = dashboardService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string filter = "month")
         {
-            return View();
+            var vm = await _dashboardService.GetDashboardDataAsync(filter);
+            return View(vm);
         }
+
         public async Task<IActionResult> UserList()
         {
             var users = _userManager.Users.ToList();
@@ -48,14 +52,12 @@ namespace FanaCRM.Controllers
             return View(model);
         }
 
-        // GET EDIT
         public async Task<IActionResult> EditRole(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return BadRequest();
 
             var user = await _userManager.FindByIdAsync(id);
-
             if (user == null)
                 return NotFound();
 
@@ -77,25 +79,21 @@ namespace FanaCRM.Controllers
             return View(model);
         }
 
-        // POST EDIT
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditRole(EditRoleVM model)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
-
             if (user == null)
                 return NotFound();
 
-            model.SelectedRoles = model.SelectedRoles ?? new List<string>();
+            model.SelectedRoles ??= new List<string>();
 
-            // ❌ No roles selected → return back to view
             if (!model.SelectedRoles.Any())
             {
-                model.SelectedRoles.Add("User"); // ✅ default role
-                TempData["Info"] = "Default Role Assigned ✅";
+                model.SelectedRoles.Add("User");
+                TempData["Info"] = "Default Role Assigned";
 
-                // reload roles (VERY IMPORTANT)
                 model.Roles = _roleManager.Roles.Select(r => new SelectListItem
                 {
                     Value = r.Name,
@@ -113,9 +111,8 @@ namespace FanaCRM.Controllers
             var rolesToAdd = model.SelectedRoles.Except(currentRoles);
             await _userManager.AddToRolesAsync(user, rolesToAdd);
 
-            return RedirectToAction("UserList");
+            return RedirectToAction(nameof(UserList));
         }
-        // POST Delete user
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -125,30 +122,22 @@ namespace FanaCRM.Controllers
                 return BadRequest();
 
             var user = await _userManager.FindByIdAsync(id);
-
             if (user == null)
                 return NotFound();
 
-            // Optional: prevent deleting yourself
             var currentUserId = _userManager.GetUserId(User);
             if (user.Id == currentUserId)
             {
                 TempData["Error"] = "You cannot delete your own account!";
-                return RedirectToAction("UserList");
+                return RedirectToAction(nameof(UserList));
             }
 
             var result = await _userManager.DeleteAsync(user);
 
-            if (result.Succeeded)
-            {
-                TempData["Success"] = "User deleted successfully ✅";
-            }
-            else
-            {
-                TempData["Error"] = "Error deleting user ❌";
-            }
+            TempData[result.Succeeded ? "Success" : "Error"] =
+                result.Succeeded ? "User deleted successfully" : "Error deleting user";
 
-            return RedirectToAction("UserList");
+            return RedirectToAction(nameof(UserList));
         }
     }
 }

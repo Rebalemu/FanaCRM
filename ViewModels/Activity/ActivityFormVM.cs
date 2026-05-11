@@ -19,6 +19,8 @@ namespace FanaCRM.ViewModels
 
         public int? ContactId { get; set; }
 
+        public int? LeadId { get; set; } // ⭐ NEW PROPERTY
+
         [Required]
         public string AssignedTo { get; set; }
 
@@ -31,5 +33,6 @@ namespace FanaCRM.ViewModels
         public List<SelectListItem> Companies { get; set; } = new();
         public List<SelectListItem> Contacts { get; set; } = new();
         public List<SelectListItem> Users { get; set; } = new();
+        public List<SelectListItem> Leads { get; set; } = new(); // ⭐ NEW PROPERTY
     }
 }

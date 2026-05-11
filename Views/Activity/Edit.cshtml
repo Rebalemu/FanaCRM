@@ -49,6 +49,10 @@
                     <label asp-for="AssignedTo"></label>
                     <select asp-for="AssignedTo" asp-items="Model.Users" class="form-select"></select>
                 </div>
+                <div class="mb-3">
+                    <label asp-for="LeadId"></label>
+                    <select asp-for="LeadId" asp-items="Model.Leads" class="form-select"></select>
+                </div>
 
                 <div class="mb-3">
                     <label asp-for="DueDate"></label>

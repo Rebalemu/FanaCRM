@@ -48,6 +48,8 @@ namespace FanaCRM.Models
         [Required]
         [DataType(DataType.DateTime)]
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        [StringLength(1000)]
+        public string? LossReason { get; set; }
 
         public ICollection<OpportunityProduct> Products { get; set; } = new List<OpportunityProduct>();
     }

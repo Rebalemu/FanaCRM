@@ -5,8 +5,8 @@
     // PRODUCT OPTIONS (WITH PRICE)
     // =========================
     let productOptions = `@Html.Raw(string.Join("", Model.ProductsData.Select(p =>
-                $"<option value='{p.Id}' data-price='{p.Price}'>{p.Name}</option>"
-        )))`;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                $"<option value='{p.Id}' data-price='{p.Price}'>{p.Name}</option>"
+                                                                                                                                                                                                                                                                )))`;
 
     // =========================
     // ADD ROW
@@ -54,8 +54,29 @@
     // REMOVE ROW
     // =========================
     function removeRow(btn) {
+
         $(btn).closest('tr').remove();
+
+        reIndexRows();
+
         calculateTotal();
+    }
+    function reIndexRows() {
+
+        $('#productsTable tbody tr').each(function (index) {
+
+            $(this).find('select, input').each(function () {
+
+                let name = $(this).attr('name');
+
+                if (name) {
+
+                    name = name.replace(/Products\[\d+\]/, `Products[${index}]`);
+
+                    $(this).attr('name', name);
+                }
+            });
+        });
     }
 
     // =========================
@@ -104,5 +125,54 @@
     $(document).ready(function () {
         calculateTotal();
     });
+
+    var deleteModal = document.getElementById('deleteModal');
+
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var id = button.getAttribute('data-id');
+
+        document.getElementById('deleteId').value = id;
+    });
+
+    // =========================
+    // LOSS REASON TOGGLE
+    // =========================
+    function toggleLossReason() {
+
+        let stageId = parseInt($("#StageId").val());
+
+        let lostStages = $("#lostStages").val()
+            .split(',')
+            .map(Number);
+
+        if (lostStages.includes(stageId)) {
+
+            $("#lossReasonContainer").removeClass("d-none");
+
+            $("#LossReason").prop("disabled", false);
+        }
+        else {
+
+            $("#lossReasonContainer").addClass("d-none");
+
+            $("#LossReason").val('');
+
+            $("#LossReason").prop("disabled", true);
+
+            $("span[data-valmsg-for='LossReason']").text('');
+        }
+    }
+    $(document).on('change', '#StageId', function () {
+        toggleLossReason();
+    });
+
+    $(document).ready(function () {
+
+        toggleLossReason();
+
+        $("#StageId").trigger("change");
+    });
+
 
 </script>

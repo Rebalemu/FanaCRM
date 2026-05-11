@@ -50,11 +50,19 @@
                     </select>
                 </div>
 
+
                 <!-- Assigned -->
                 <div class="mb-3">
                     <label asp-for="AssignedTo"></label>
                     <select asp-for="AssignedTo" asp-items="Model.Users" class="form-select">
                         <option value="">-- Select User --</option>
+                    </select>
+                </div>
+                <!-- Lead -->
+                <div class="mb-3">
+                    <label asp-for="LeadId"></label>
+                    <select asp-for="LeadId" asp-items="Model.Leads" class="form-control">
+                        <option value="">-- Select Lead --</option>
                     </select>
                 </div>
 

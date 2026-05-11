@@ -2,6 +2,7 @@
 
 @Html.AntiForgeryToken()
 <input type="hidden" asp-for="Id" />
+<input type="hidden" id="lostStages" value="@string.Join(",", Model.LostStageIds)" />
 
 <div asp-validation-summary="All" class="text-danger"></div>
 
@@ -30,6 +31,11 @@
     <div class="col-md-4">
         <label asp-for="StageId"></label>
         <select asp-for="StageId" asp-items="Model.Stages" class="form-select"></select>
+    </div>
+    <div class="col-12 mt-3" id="lossReasonContainer"">
+        <label asp-for=" LossReason"></label>
+        <textarea asp-for="LossReason" class="form-control"></textarea>
+        <span asp-validation-for="LossReason" class="text-danger"></span>
     </div>
 
     <div class="col-md-4">
@@ -71,7 +77,8 @@
 
                         @foreach (var p in Model.ProductsData)
                         {
-                            <option value="@p.Id" data-price="@p.Price" selected="@(Model.Products[@i].ProductId == p.Id)">
+                            <option value="@p.Id" data-price="@p.Price"
+                                    selected="@(Model.Products[i].ProductId == p.Id ? "selected" : null)">
                                 @p.Name
                             </option>
                         }

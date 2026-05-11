@@ -17,18 +17,10 @@ namespace FanaCRM.Controllers
         }
 
         // ===================== INDEX =====================
-        public async Task<IActionResult> Index(string search)
+        public async Task<IActionResult> Index()
         {
-            var query = _context.Contacts
+            var contacts = await _context.Contacts
                 .Include(c => c.Company)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(c => c.FullName.Contains(search));
-            }
-
-            var contacts = await query
                 .OrderByDescending(c => c.CreatedDate)
                 .Select(c => new ContactIndexVM
                 {

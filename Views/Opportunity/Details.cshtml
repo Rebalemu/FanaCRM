@@ -24,6 +24,14 @@
                 <span class="badge bg-primary">@Model.StageName (@Model.Probability%)</span>
             </div>
         </div>
+        @if (!string.IsNullOrWhiteSpace(Model.LossReason))
+        {
+            <div class="alert alert-danger mt-3">
+                <strong>Loss Reason:</strong>
+                <br />
+                @Model.LossReason
+            </div>
+        }
 
         <div class="col-md-3">
             <div class="card text-center p-3">
@@ -35,7 +43,7 @@
         <div class="col-md-3">
             <div class="card text-center p-3">
                 <h6>Assigned</h6>
-                <strong>@Model.AssignedTo</strong>
+                <strong>@Model.AssignedToName</strong>
             </div>
         </div>
     </div>

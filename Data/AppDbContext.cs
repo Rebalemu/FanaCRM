@@ -22,6 +22,7 @@ namespace FanaCRM.Data
         public DbSet<OpportunityStage> OpportunityStages { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<ActivityType> ActivityTypes { get; set; }
+        public DbSet<OpportunityStageHistory> OpportunityStageHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -136,8 +137,8 @@ namespace FanaCRM.Data
                     new ActivityType { Id = 3, Name = "Email" },
                     new ActivityType { Id = 4, Name = "Task" }
                 );
+            modelBuilder.Entity<OpportunityStageHistory>();
         }
-
     }
 }
 

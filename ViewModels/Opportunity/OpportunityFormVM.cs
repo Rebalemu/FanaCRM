@@ -26,6 +26,8 @@ namespace FanaCRM.ViewModels
         [Required]
         public string AssignedTo { get; set; }
 
+        public string? LossReason { get; set; }
+
         public List<OpportunityProductVM> Products { get; set; } = new();
         public List<Product> ProductsData { get; set; } = new List<Product>();
 
@@ -35,6 +37,7 @@ namespace FanaCRM.ViewModels
         public List<SelectListItem> Stages { get; set; } = new();
         public List<SelectListItem> Users { get; set; } = new();
         public List<SelectListItem> ProductList { get; set; } = new();
+        public List<int> LostStageIds { get; set; } = new();
 
 
         // Calculated

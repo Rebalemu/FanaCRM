@@ -17,7 +17,7 @@ namespace FanaCRM.Controllers
         }
 
         // =========================
-        // INDEX (List + Filter)
+        // INDEX
         // =========================
         public async Task<IActionResult> Index(string search, string status)
         {
@@ -28,13 +28,11 @@ namespace FanaCRM.Controllers
                 .Include(a => a.User)
                 .AsQueryable();
 
-            // Search
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(a => a.Subject.Contains(search));
             }
 
-            // Status filter
             if (!string.IsNullOrEmpty(status))
             {
                 query = query.Where(a => a.Status == status);
@@ -80,7 +78,7 @@ namespace FanaCRM.Controllers
                 Description = activity.Description,
                 TypeName = activity.Type.Name,
                 CompanyName = activity.Company?.Name,
-                ContactName = activity.Contact != null ? activity.Contact.FullName : null,
+                ContactName = activity.Contact?.FullName,
                 AssignedTo = activity.User.FullName,
                 DueDate = activity.DueDate,
                 Status = activity.Status,
@@ -101,7 +99,7 @@ namespace FanaCRM.Controllers
         }
 
         // =========================
-        // CREATE (POST)
+        // CREATE (POST) ⭐ MAIN LOGIC
         // =========================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -120,6 +118,7 @@ namespace FanaCRM.Controllers
                 Description = vm.Description,
                 CompanyId = vm.CompanyId,
                 ContactId = vm.ContactId,
+                LeadId = vm.Id, // ⭐ IMPORTANT ADDITION
                 AssignedTo = vm.AssignedTo,
                 DueDate = vm.DueDate,
                 Status = vm.Status,
@@ -128,6 +127,11 @@ namespace FanaCRM.Controllers
 
             _context.Activities.Add(activity);
             await _context.SaveChangesAsync();
+
+            // =========================
+            // STEP 4: UPDATE LEAD TRACKING
+            // =========================
+            await UpdateLeadTracking(activity);
 
             return RedirectToAction(nameof(Index));
         }
@@ -148,6 +152,7 @@ namespace FanaCRM.Controllers
                 Description = activity.Description,
                 CompanyId = activity.CompanyId,
                 ContactId = activity.ContactId,
+                LeadId = activity.LeadId,
                 AssignedTo = activity.AssignedTo,
                 DueDate = activity.DueDate,
                 Status = activity.Status
@@ -178,11 +183,14 @@ namespace FanaCRM.Controllers
             activity.Description = vm.Description;
             activity.CompanyId = vm.CompanyId;
             activity.ContactId = vm.ContactId;
+            activity.LeadId = vm.LeadId;
             activity.AssignedTo = vm.AssignedTo;
             activity.DueDate = vm.DueDate;
             activity.Status = vm.Status;
 
             await _context.SaveChangesAsync();
+
+            await UpdateLeadTracking(activity); // ⭐ keep tracking updated
 
             return RedirectToAction(nameof(Index));
         }
@@ -201,10 +209,56 @@ namespace FanaCRM.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
         // =========================
-        // DROPDOWN LOADER (REUSABLE)
+        // STEP 4 CORE LOGIC
         // =========================
-        private async Task LoadDropdowns(dynamic vm)
+        private async Task UpdateLeadTracking(Activity activity)
+        {
+            if (activity.LeadId == null)
+                return;
+
+            var lead = await _context.Leads.FindAsync(activity.LeadId);
+
+            if (lead == null)
+                return;
+
+            // Always update last activity
+            lead.LastActivityDate = activity.CreatedDate;
+
+            // Only real contact counts
+            if (IsContactActivity(activity.TypeId))
+            {
+                lead.LastContactedDate = activity.CreatedDate;
+            }
+
+            // Optional: revive stale lead
+            var staleStatus = await _context.LeadStatuses
+                .FirstOrDefaultAsync(s => s.Name == "Stale");
+
+            var activeStatus = await _context.LeadStatuses
+                .FirstOrDefaultAsync(s => s.Name == "New");
+
+            if (staleStatus != null &&
+                activeStatus != null &&
+                lead.StatusId == staleStatus.Id)
+            {
+                lead.StatusId = activeStatus.Id;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private bool IsContactActivity(int typeId)
+        {
+            // adjust to your ActivityType IDs
+            return typeId == 1 || typeId == 2 || typeId == 3;
+        }
+
+        // =========================
+        // DROPDOWNS
+        // =========================
+        private async Task LoadDropdowns(ActivityFormVM vm)
         {
             vm.Types = await _context.ActivityTypes
                 .Select(t => new SelectListItem
@@ -232,6 +286,13 @@ namespace FanaCRM.Controllers
                 {
                     Value = u.Id,
                     Text = u.FullName
+                }).ToListAsync();
+
+            vm.Leads = await _context.Leads
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Id.ToString(),
+                    Text = l.FullName
                 }).ToListAsync();
         }
     }

@@ -1,5 +1,7 @@
 using FanaCRM.Data;
 using FanaCRM.Models;
+using FanaCRM.Services;
+using FanaCRM.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UserRoles.Services;
@@ -25,6 +27,18 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 builder.Services.AddScoped<ILeadService, LeadService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<LeadAutomationService>();
+builder.Services.AddHostedService<LeadStaleWorker>();
+builder.Services.AddScoped<ISalesDashboardService, SalesDashboardService>();
+builder.Services.AddScoped<IOpportunityService, OpportunityService>();
+
+// Ridirect Unauthorized users to forbidden page
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/Home/Forbidden";
+});
 
 var app = builder.Build();
 

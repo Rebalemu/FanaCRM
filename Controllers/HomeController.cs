@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -35,5 +36,11 @@ public class HomeController : Controller
         return RedirectToAction("Contact");
     }
 
+    [AllowAnonymous]
+    public IActionResult Forbidden()
+    {
+        Response.StatusCode = 403; // Set HTTP status code
+        return View();
+    }
 
 }

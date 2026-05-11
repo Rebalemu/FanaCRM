@@ -2,105 +2,297 @@
 
 @{
     ViewData["Title"] = "Activities";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
 
+    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Activity Management</h3>
-        <a asp-action="Create" class="btn btn-primary">+ New Activity</a>
+
+        <div>
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-activity"></i>
+                Activity Management
+            </h3>
+
+            <small class="text-muted">
+                Track tasks, calls, meetings, and follow-ups
+            </small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+
+            <i class="bi bi-plus-circle"></i>
+            New Activity
+
+        </a>
+
     </div>
 
-    <div class="card shadow-sm">
+    <!-- CARD -->
+    <div class="card shadow border-0">
+
         <div class="card-body">
 
-            <!-- Search -->
-            <form method="get" class="row mb-3">
-                <div class="col-md-4">
-                    <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control"
-                           placeholder="Search by subject..." />
-                </div>
+            <div class="table-responsive">
 
-                <div class="col-md-3">
-                    <select name="status" class="form-select">
-                        <option value="">All Status</option>
-                        <option value="Open">Open</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                </div>
+                <table id="activityTable" class="table table-hover table-striped align-middle w-100">
 
-                <div class="col-md-2">
-                    <button class="btn btn-outline-primary">Search</button>
-                </div>
-            </form>
+                    <!-- HEADER -->
+                    <thead class="table-dark">
 
-            <!-- Table -->
-            <table class="table table-hover table-striped align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Subject</th>
-                        <th>Type</th>
-                        <th>Company</th>
-                        <th>Contact</th>
-                        <th>Assigned To</th>
-                        <th>Due Date</th>
-                        <th>Status</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
+                        <!-- FILTER ROW -->
+                        <tr>
 
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var item in Model)
+                            <th>
+                                <input type="text" class="form-control form-control-sm column-search"
+                                       placeholder="Search Subject" />
+                            </th>
+
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Types</option>
+                                </select>
+                            </th>
+
+                            <th>
+                                <input type="text" class="form-control form-control-sm column-search"
+                                       placeholder="Search Company" />
+                            </th>
+
+                            <th>
+                                <input type="text" class="form-control form-control-sm column-search"
+                                       placeholder="Search Contact" />
+                            </th>
+
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Users</option>
+                                </select>
+                            </th>
+
+                            <th>
+                                <input type="text" class="form-control form-control-sm column-search"
+                                       placeholder="Due Date" />
+                            </th>
+
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Status</option>
+                                    <option value="Open">Open</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <!-- BODY -->
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <!-- SUBJECT -->
+                                    <td class="fw-semibold">
+                                        @item.Subject
+                                    </td>
+
+                                    <!-- TYPE -->
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            @item.TypeName
+                                        </span>
+                                    </td>
+
+                                    <!-- COMPANY -->
+                                    <td>
+                                        @(item.CompanyName ?? "N/A")
+                                    </td>
+
+                                    <!-- CONTACT -->
+                                    <td>
+                                        @(item.ContactName ?? "N/A")
+                                    </td>
+
+                                    <!-- ASSIGNED -->
+                                    <td>
+                                        @item.AssignedTo
+                                    </td>
+
+                                    <!-- DUE DATE -->
+                                    <td>
+                                        @(item.DueDate?.ToString("yyyy-MM-dd") ?? "-")
+                                    </td>
+
+                                    <!-- STATUS -->
+                                    <td>
+
+                                        @{
+                                            var statusClass = item.Status switch
+                                            {
+                                                "Open" => "bg-primary",
+                                                "Completed" => "bg-success",
+                                                "Cancelled" => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+
+                                        <span class="badge @statusClass">
+                                            @item.Status
+                                        </span>
+
+                                    </td>
+
+                                    <!-- ACTIONS -->
+                                    <td class="text-end">
+
+                                        <div class="btn-group">
+
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+
+                                                <i class="bi bi-pencil-square"></i>
+
+                                            </a>
+
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+
+                                                <i class="bi bi-eye-fill"></i>
+
+                                            </a>
+
+                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                                    data-bs-target="#deleteModal" data-id="@item.Id">
+
+                                                <i class="bi bi-trash-fill"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@item.Subject</td>
-                                <td>@item.TypeName</td>
-                                <td>@(item.CompanyName ?? "N/A")</td>
-                                <td>@(item.ContactName ?? "N/A")</td>
-                                <td>@item.AssignedTo</td>
-                                <td>@(item.DueDate?.ToString("yyyy-MM-dd") ?? "-")</td>
-                                <td>
-                                    <span
-                                        class="badge bg-@(item.Status == "Open" ? "primary" : item.Status == "Completed" ? "success" : "danger")">
-                                        @item.Status
-                                    </span>
-                                </td>
+                                <td colspan="8" class="text-center text-muted py-4">
 
-                                <td class="text-end">
-                                    <div class="btn-group">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning mx-1">
-                                            <i class="bi bi-pencil-square"></i>Edit
-                                        </a>
+                                    No activities found.
 
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info mx-1">
-                                            <i class="bi bi-eye-fill"></i>View
-                                        </a>
-
-                                        <button class="btn btn-sm btn-danger mx-1" data-bs-toggle="modal"
-                                                data-bs-target="#deleteModal" data-id="@item.Id">
-                                            <i class="bi bi-trash-fill"></i>Delete
-                                        </button>
-                                    </div>
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="8" class="text-center text-muted">
-                                No activities found.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
+
     </div>
+
 </div>
 
 @await Html.PartialAsync("_DeleteModal")
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            // SELECT2
+            $('.searchable-dropdown').select2({
+
+                theme: 'bootstrap-5',
+
+                width: '100%',
+
+                placeholder: 'Select',
+
+                allowClear: true
+
+            });
+
+            // DATATABLE
+            var table = $('#activityTable').DataTable({
+
+                responsive: true,
+                autoWidth: false,
+                orderCellsTop: true,
+                fixedHeader: true,
+                pageLength: 10,
+                order: [[5, 'desc']], // Due Date
+
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: 7
+                    }
+                ],
+
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search activities..."
+                }
+
+            });
+
+            // TEXT FILTERS
+            $('#activityTable thead tr:eq(0) th').each(function (i) {
+
+                $('input', this).on('keyup change', function () {
+
+                    if (table.column(i).search() !== this.value) {
+
+                        table
+                            .column(i)
+                            .search(this.value)
+                            .draw();
+
+                    }
+
+                });
+
+            });
+
+            // DROPDOWN FILTERS
+            $('#activityTable thead tr:eq(0) th').each(function (i) {
+
+                var select = $(this).find('select');
+
+                if (select.length > 0) {
+
+                    select.on('change', function () {
+
+                        var value = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                        table
+                            .column(i)
+                            .search(value ? '^' + value + '$' : '', true, false)
+                            .draw();
+
+                    });
+
+                }
+
+            });
+
+        });
+
+    </script>
+
+}

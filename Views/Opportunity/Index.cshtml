@@ -1,100 +1,394 @@
 @model List<FanaCRM.ViewModels.OpportunityIndexVM>
 
-<div class="container mt-4">
+@{
+    ViewData["Title"] = "Opportunities";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
 
-    <div class="d-flex justify-content-between mb-3">
-        <h3>Opportunities</h3>
-        <a asp-action="Create" class="btn btn-primary">+ New</a>
+<div class="container-fluid mt-4">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-briefcase-fill"></i>
+                Opportunity Management
+            </h3>
+
+            <small class="text-muted">
+                Track sales pipeline and deal progress
+            </small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+
+            <i class="bi bi-plus-circle"></i>
+            New Opportunity
+
+        </a>
+
     </div>
 
-    <div class="card mb-3 p-3">
-        <form method="get" class="row g-2">
-            <div class="col-md-4">
-                <input name="search" class="form-control" placeholder="Search..." />
-            </div>
+    <!-- CARD -->
+    <div class="card shadow border-0">
 
-            <div class="col-md-4">
-                <select name="stageId" asp-items="ViewBag.Stages" class="form-select">
-                    <option value="">All Stages</option>
-                </select>
-            </div>
+        <div class="card-body">
 
-            <div class="col-md-2">
-                <button class="btn btn-outline-primary w-100">Filter</button>
-            </div>
-        </form>
-    </div>
+            <div class="table-responsive">
 
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Company</th>
-                        <th>Stage</th>
-                        <th>Amount</th>
-                        <th>Close</th>
-                        <th>Assigned</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Any())
-                    {
+                <table id="opportunityTable" class="table table-hover table-striped align-middle w-100">
+
+                    <!-- TABLE HEADER -->
+                    <thead class="table-dark">
+
+                        <!-- FILTER ROW -->
                         <tr>
-                            <td colspan="7" class="text-center text-muted">
-                                No opportunities found
-                            </td>
+
+                            <!-- NAME -->
+                            <th>
+                                <input type="text" placeholder="Search Opportunity"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- COMPANY -->
+                            <th>
+                                <input type="text" placeholder="Search Company"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- STAGE -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Stages</option>
+                                </select>
+                            </th>
+
+                            <!-- AMOUNT -->
+                            <th>
+                                <input type="text" placeholder="Search Amount"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- CLOSE DATE -->
+                            <th>
+                                <input type="text" placeholder="Close Date"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- ASSIGNED -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Users</option>
+                                </select>
+                            </th>
+
+                            <!-- ACTION -->
+                            <th>Actions</th>
+
                         </tr>
-                    }
-                    else
-                    {
-                        @foreach (var item in Model)
+
+
+                    </thead>
+
+                    <!-- TABLE BODY -->
+                    <tbody>
+
+                        @if (!Model.Any())
                         {
                             <tr>
-                                <td>@item.Name</td>
-                                <td>@item.CompanyName</td>
-                                <td>
-                                    @{
-                                        var badgeClass = item.StageName switch
-                                        {
-                                            "Prospect" => "bg-secondary",
-                                            "Qualified" => "bg-info",
-                                            "Proposal" => "bg-primary",
-                                            "Negotiation" => "bg-warning",
-                                            "Won" => "bg-success",
-                                            "Lost" => "bg-danger",
-                                            _ => "bg-dark"
-                                        };
-                                    }
 
-                                    <span class="badge @badgeClass">
-                                        @item.StageName (@item.Probability%)
-                                    </span>
+                                <td colspan="7" class="text-center text-muted py-4">
+
+                                    No opportunities found
+
                                 </td>
-                                <td class="text-success">@item.Amount.ToString("N2")</td>
-                                <td>@(item.CloseDate?.ToString("MMM dd") ?? "-")</td>
-                                <td>@item.AssignedTo</td>
-                                <td class="text-end">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning mx-1">
-                                        <i class="bi bi-pencil-square"></i> Edit
-                                    </a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info mx-1">
-                                        <i class="bi bi-eye-fill"></i> View
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-danger mx-1" data-bs-toggle="modal"
-                                            data-bs-target="#deleteModal" data-id="@item.Id">
-                                        <i class="bi bi-trash-fill"></i> Delete
-                                    </button>
-                                </td>
+
                             </tr>
                         }
-                    }
-                </tbody>
-            </table>
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <!-- NAME -->
+                                    <td class="fw-semibold">
+
+                                        @item.Name
+
+                                    </td>
+
+                                    <!-- COMPANY -->
+                                    <td>
+
+                                        @if (!string.IsNullOrEmpty(item.CompanyName))
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @item.CompanyName
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                N/A
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- STAGE -->
+                                    <td>
+
+                                        @{
+                                            var badgeClass = item.StageName switch
+                                            {
+                                                "Prospect" => "bg-secondary",
+                                                "Qualified" => "bg-info",
+                                                "Proposal" => "bg-primary",
+                                                "Negotiation" => "bg-warning",
+                                                "Won" => "bg-success",
+                                                "Lost" => "bg-danger",
+                                                _ => "bg-dark"
+                                            };
+                                        }
+
+                                        <span class="badge @badgeClass">
+
+                                            @item.StageName
+                                            (@item.Probability%)
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- AMOUNT -->
+                                    <td>
+
+                                        @{
+                                            var amountClass = item.StageName == "Won"
+                                                ? "fw-bold text-success"
+                                                : "fw-bold text-warning";
+                                        }
+
+                                        <span class="@amountClass">
+
+                                            $@item.Amount.ToString("N2")
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- CLOSE DATE -->
+                                    <td>
+
+                                        @(item.CloseDate?.ToString("yyyy-MM-dd") ?? "-")
+
+                                    </td>
+
+                                    <!-- ASSIGNED -->
+                                    <td>
+
+                                        @if (!string.IsNullOrEmpty(item.AssignedTo))
+                                        {
+                                            <span class="badge bg-dark">
+
+                                                @item.AssignedTo
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+
+                                                Unassigned
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- ACTIONS -->
+                                    <td class="text-start">
+
+                                        <div class="btn-group">
+
+                                            <!-- EDIT -->
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+
+                                                <i class="bi bi-pencil-square"></i>
+
+                                            </a>
+
+                                            <!-- DETAILS -->
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+
+                                                <i class="bi bi-eye-fill"></i>
+
+                                            </a>
+
+                                            <!-- DELETE -->
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                                    data-bs-target="#deleteModal" data-id="@item.Id">
+
+                                                <i class="bi bi-trash-fill"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         </div>
+
     </div>
 
 </div>
+
 @await Html.PartialAsync("_DeleteModal")
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            // SELECT2
+            $('.searchable-dropdown').select2({
+
+                theme: 'bootstrap-5',
+
+                width: '100%',
+
+                placeholder: 'Select',
+
+                allowClear: true
+
+            });
+
+            // DATATABLE
+            var table = $('#opportunityTable').DataTable({
+
+                responsive: true,
+
+                autoWidth: false,
+
+                orderCellsTop: true,
+
+                fixedHeader: true,
+
+                pageLength: 10,
+
+                order: [[4, 'asc']],
+
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: 6
+                    }
+                ],
+
+                language: {
+
+                    search: "_INPUT_",
+
+                    searchPlaceholder: "Global Search..."
+
+                },
+
+                initComplete: function () {
+
+                    var api = this.api();
+
+                    // STAGE FILTER
+                    createDropdownFilter(api, 2);
+
+                    // ASSIGNED FILTER
+                    createDropdownFilter(api, 5);
+
+                }
+
+            });
+
+            // =====================================
+            // TEXT FILTERS
+            // =====================================
+
+            $('#opportunityTable thead tr:eq(0) th').each(function (i) {
+
+                var input = $(this).find('input');
+
+                if (input.length > 0) {
+
+                    $(input).on('keyup change', function () {
+
+                        if (table.column(i).search() !== this.value) {
+
+                            table
+                                .column(i)
+                                .search(this.value)
+                                .draw();
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+            // =====================================
+            // DROPDOWN FILTERS
+            // =====================================
+
+            function createDropdownFilter(api, columnIndex) {
+
+                var column = api.column(columnIndex);
+
+                var select = $('#opportunityTable thead tr:eq(0) th')
+                    .eq(columnIndex)
+                    .find('select');
+
+                // UNIQUE VALUES
+                column.data().unique().sort().each(function (d) {
+
+                    var text = $('<div>').html(d).text().trim();
+
+                    if (text !== '') {
+
+                        select.append(
+                            `<option value="${text}">${text}</option>`
+                        );
+
+                    }
+
+                });
+
+                // FILTER EVENT
+                select.on('change', function () {
+
+                    var value = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                    column
+                        .search(value ? '^' + value + '$' : '', true, false)
+                        .draw();
+
+                });
+
+            }
+
+        });
+
+    </script>
+
+}

@@ -1,4 +1,3 @@
-
 namespace FanaCRM.ViewModels
 {
     public class ActivityDetailsVM
@@ -9,11 +8,15 @@ namespace FanaCRM.ViewModels
 
         public string Subject { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        public string CompanyName { get; set; }
+        public string? CompanyName { get; set; }
 
-        public string ContactName { get; set; }
+        public string? ContactName { get; set; }
+
+        public string? LeadName { get; set; }
+
+        public string? OpportunityName { get; set; }
 
         public string AssignedTo { get; set; }
 
@@ -21,6 +24,10 @@ namespace FanaCRM.ViewModels
 
         public string Status { get; set; }
 
+        public bool IsCompleted { get; set; }
+
         public DateTime CreatedDate { get; set; }
+
+        public DateTime? CompletedAt { get; set; }
     }
 }

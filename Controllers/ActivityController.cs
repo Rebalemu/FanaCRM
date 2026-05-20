@@ -1,299 +1,166 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using FanaCRM.Data;
 using FanaCRM.Models;
+using FanaCRM.Services.Interfaces;
 using FanaCRM.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FanaCRM.Controllers
 {
+    [Authorize]
     public class ActivityController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IActivityService _service;
+        private readonly UserManager<Users> _userManager;
 
-        public ActivityController(AppDbContext context)
+        public ActivityController(
+            IActivityService service,
+            UserManager<Users> userManager)
         {
-            _context = context;
+            _service = service;
+            _userManager = userManager;
         }
 
-        // =========================
+        // =====================================================
         // INDEX
-        // =========================
-        public async Task<IActionResult> Index(string search, string status)
+        // =====================================================
+
+        public async Task<IActionResult> Index()
         {
-            var query = _context.Activities
-                .Include(a => a.Type)
-                .Include(a => a.Company)
-                .Include(a => a.Contact)
-                .Include(a => a.User)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(a => a.Subject.Contains(search));
-            }
-
-            if (!string.IsNullOrEmpty(status))
-            {
-                query = query.Where(a => a.Status == status);
-            }
-
-            var activities = await query
-                .OrderByDescending(a => a.CreatedDate)
-                .Select(a => new ActivityIndexVM
-                {
-                    Id = a.Id,
-                    Subject = a.Subject,
-                    TypeName = a.Type.Name,
-                    CompanyName = a.Company != null ? a.Company.Name : null,
-                    ContactName = a.Contact != null ? a.Contact.FullName : null,
-                    AssignedTo = a.User.FullName,
-                    DueDate = a.DueDate,
-                    Status = a.Status
-                })
-                .AsNoTracking()
-                .ToListAsync();
+            var activities = await _service.GetAllAsync();
 
             return View(activities);
         }
 
-        // =========================
-        // DETAILS
-        // =========================
-        public async Task<IActionResult> Details(int id)
-        {
-            var activity = await _context.Activities
-                .Include(a => a.Type)
-                .Include(a => a.Company)
-                .Include(a => a.Contact)
-                .Include(a => a.User)
-                .FirstOrDefaultAsync(a => a.Id == id);
+        // =====================================================
+        // CREATE GET
+        // =====================================================
 
-            if (activity == null) return NotFound();
-
-            var vm = new ActivityDetailsVM
-            {
-                Id = activity.Id,
-                Subject = activity.Subject,
-                Description = activity.Description,
-                TypeName = activity.Type.Name,
-                CompanyName = activity.Company?.Name,
-                ContactName = activity.Contact?.FullName,
-                AssignedTo = activity.User.FullName,
-                DueDate = activity.DueDate,
-                Status = activity.Status,
-                CreatedDate = activity.CreatedDate
-            };
-
-            return View(vm);
-        }
-
-        // =========================
-        // CREATE (GET)
-        // =========================
         public async Task<IActionResult> Create()
         {
-            var vm = new ActivityFormVM();
-            await LoadDropdowns(vm);
-            return View(vm);
+            return View(await _service.GetCreateVMAsync());
         }
 
-        // =========================
-        // CREATE (POST) ⭐ MAIN LOGIC
-        // =========================
+        // =====================================================
+        // CREATE POST
+        // =====================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ActivityFormVM vm)
         {
             if (!ModelState.IsValid)
             {
-                await LoadDropdowns(vm);
+                var reloadVm = await _service.GetCreateVMAsync();
+
+                vm.Types = reloadVm.Types;
+                vm.Statuses = reloadVm.Statuses;
+                vm.Companies = reloadVm.Companies;
+                vm.Contacts = reloadVm.Contacts;
+                vm.Leads = reloadVm.Leads;
+                vm.Opportunities = reloadVm.Opportunities;
+                vm.Users = reloadVm.Users;
+
                 return View(vm);
             }
 
-            var activity = new Activity
-            {
-                TypeId = vm.TypeId,
-                Subject = vm.Subject,
-                Description = vm.Description,
-                CompanyId = vm.CompanyId,
-                ContactId = vm.ContactId,
-                LeadId = vm.Id, // ⭐ IMPORTANT ADDITION
-                AssignedTo = vm.AssignedTo,
-                DueDate = vm.DueDate,
-                Status = vm.Status,
-                CreatedDate = DateTime.UtcNow
-            };
+            var userId = _userManager.GetUserId(User);
 
-            _context.Activities.Add(activity);
-            await _context.SaveChangesAsync();
-
-            // =========================
-            // STEP 4: UPDATE LEAD TRACKING
-            // =========================
-            await UpdateLeadTracking(activity);
+            await _service.CreateAsync(vm, userId);
 
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // EDIT (GET)
-        // =========================
+        // =====================================================
+        // DETAILS
+        // =====================================================
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var activity = await _service.GetDetailsAsync(id);
+
+            if (activity == null)
+                return NotFound();
+
+            return View(activity);
+        }
+
+        // =====================================================
+        // EDIT GET
+        // =====================================================
+
         public async Task<IActionResult> Edit(int id)
         {
-            var activity = await _context.Activities.FindAsync(id);
-            if (activity == null) return NotFound();
+            var vm = await _service.GetEditVMAsync(id);
 
-            var vm = new ActivityFormVM
-            {
-                Id = activity.Id,
-                TypeId = activity.TypeId,
-                Subject = activity.Subject,
-                Description = activity.Description,
-                CompanyId = activity.CompanyId,
-                ContactId = activity.ContactId,
-                LeadId = activity.LeadId,
-                AssignedTo = activity.AssignedTo,
-                DueDate = activity.DueDate,
-                Status = activity.Status
-            };
+            if (vm == null)
+                return NotFound();
 
-            await LoadDropdowns(vm);
             return View(vm);
         }
 
-        // =========================
-        // EDIT (POST)
-        // =========================
+        // =====================================================
+        // EDIT POST
+        // =====================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ActivityFormVM vm)
         {
             if (!ModelState.IsValid)
             {
-                await LoadDropdowns(vm);
+                var reloadVm = await _service.GetCreateVMAsync();
+
+                vm.Types = reloadVm.Types;
+                vm.Statuses = reloadVm.Statuses;
+                vm.Companies = reloadVm.Companies;
+                vm.Contacts = reloadVm.Contacts;
+                vm.Leads = reloadVm.Leads;
+                vm.Opportunities = reloadVm.Opportunities;
+                vm.Users = reloadVm.Users;
+
                 return View(vm);
             }
 
-            var activity = await _context.Activities.FindAsync(vm.Id);
-            if (activity == null) return NotFound();
+            var userId = _userManager.GetUserId(User);
 
-            activity.TypeId = vm.TypeId;
-            activity.Subject = vm.Subject;
-            activity.Description = vm.Description;
-            activity.CompanyId = vm.CompanyId;
-            activity.ContactId = vm.ContactId;
-            activity.LeadId = vm.LeadId;
-            activity.AssignedTo = vm.AssignedTo;
-            activity.DueDate = vm.DueDate;
-            activity.Status = vm.Status;
-
-            await _context.SaveChangesAsync();
-
-            await UpdateLeadTracking(activity); // ⭐ keep tracking updated
+            await _service.UpdateAsync(vm, userId);
 
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // DELETE
-        // =========================
+        // =====================================================
+        // COMPLETE
+        // =====================================================
+
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Complete(int id)
         {
-            var activity = await _context.Activities.FindAsync(id);
-            if (activity == null) return NotFound();
-
-            _context.Activities.Remove(activity);
-            await _context.SaveChangesAsync();
+            await _service.CompleteAsync(id);
 
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // STEP 4 CORE LOGIC
-        // =========================
-        private async Task UpdateLeadTracking(Activity activity)
+        // =====================================================
+        // CANCEL
+        // =====================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id)
         {
-            if (activity.LeadId == null)
-                return;
+            await _service.CancelAsync(id);
 
-            var lead = await _context.Leads.FindAsync(activity.LeadId);
-
-            if (lead == null)
-                return;
-
-            // Always update last activity
-            lead.LastActivityDate = activity.CreatedDate;
-
-            // Only real contact counts
-            if (IsContactActivity(activity.TypeId))
-            {
-                lead.LastContactedDate = activity.CreatedDate;
-            }
-
-            // Optional: revive stale lead
-            var staleStatus = await _context.LeadStatuses
-                .FirstOrDefaultAsync(s => s.Name == "Stale");
-
-            var activeStatus = await _context.LeadStatuses
-                .FirstOrDefaultAsync(s => s.Name == "New");
-
-            if (staleStatus != null &&
-                activeStatus != null &&
-                lead.StatusId == staleStatus.Id)
-            {
-                lead.StatusId = activeStatus.Id;
-            }
-
-            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
-
-        private bool IsContactActivity(int typeId)
+        public async Task<IActionResult> Dashboard()
         {
-            // adjust to your ActivityType IDs
-            return typeId == 1 || typeId == 2 || typeId == 3;
-        }
+            var userId = _userManager.GetUserId(User);
 
-        // =========================
-        // DROPDOWNS
-        // =========================
-        private async Task LoadDropdowns(ActivityFormVM vm)
-        {
-            vm.Types = await _context.ActivityTypes
-                .Select(t => new SelectListItem
-                {
-                    Value = t.Id.ToString(),
-                    Text = t.Name
-                }).ToListAsync();
+            var vm = await _service.GetDashboardAsync(userId);
 
-            vm.Companies = await _context.Companies
-                .Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                }).ToListAsync();
-
-            vm.Contacts = await _context.Contacts
-                .Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.FullName
-                }).ToListAsync();
-
-            vm.Users = await _context.Users
-                .Select(u => new SelectListItem
-                {
-                    Value = u.Id,
-                    Text = u.FullName
-                }).ToListAsync();
-
-            vm.Leads = await _context.Leads
-                .Select(l => new SelectListItem
-                {
-                    Value = l.Id.ToString(),
-                    Text = l.FullName
-                }).ToListAsync();
+            return View(vm);
         }
     }
 }

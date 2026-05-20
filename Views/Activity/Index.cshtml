@@ -7,18 +7,24 @@
 
 <div class="container-fluid mt-4">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
-            <h3 class="fw-bold mb-0">
+
+            <h3 class="fw-bold mb-1">
+
                 <i class="bi bi-activity"></i>
                 Activity Management
+
             </h3>
 
             <small class="text-muted">
-                Track tasks, calls, meetings, and follow-ups
+
+                Manage calls, meetings, tasks, and follow-ups
+
             </small>
+
         </div>
 
         <a asp-action="Create" class="btn btn-primary shadow-sm">
@@ -37,56 +43,28 @@
 
             <div class="table-responsive">
 
-                <table id="activityTable" class="table table-hover table-striped align-middle w-100">
+                <table id="activityTable" class="table table-hover align-middle w-100">
 
-                    <!-- HEADER -->
+                    <!-- HEAD -->
                     <thead class="table-dark">
 
-                        <!-- FILTER ROW -->
                         <tr>
 
-                            <th>
-                                <input type="text" class="form-control form-control-sm column-search"
-                                       placeholder="Search Subject" />
-                            </th>
+                            <th>Subject</th>
 
-                            <th>
-                                <select class="form-select form-select-sm searchable-dropdown">
-                                    <option value="">All Types</option>
-                                </select>
-                            </th>
+                            <th>Type</th>
 
-                            <th>
-                                <input type="text" class="form-control form-control-sm column-search"
-                                       placeholder="Search Company" />
-                            </th>
+                            <th>Company</th>
 
-                            <th>
-                                <input type="text" class="form-control form-control-sm column-search"
-                                       placeholder="Search Contact" />
-                            </th>
+                            <th>Contact</th>
 
-                            <th>
-                                <select class="form-select form-select-sm searchable-dropdown">
-                                    <option value="">All Users</option>
-                                </select>
-                            </th>
+                            <th>Assigned</th>
 
-                            <th>
-                                <input type="text" class="form-control form-control-sm column-search"
-                                       placeholder="Due Date" />
-                            </th>
+                            <th>Due Date</th>
 
-                            <th>
-                                <select class="form-select form-select-sm searchable-dropdown">
-                                    <option value="">All Status</option>
-                                    <option value="Open">Open</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                            </th>
+                            <th>Status</th>
 
-                            <th>Actions</th>
+                            <th class="text-end">Actions</th>
 
                         </tr>
 
@@ -95,7 +73,7 @@
                     <!-- BODY -->
                     <tbody>
 
-                        @if (Model != null && Model.Any())
+                        @if (Model.Any())
                         {
                             foreach (var item in Model)
                             {
@@ -103,34 +81,58 @@
 
                                     <!-- SUBJECT -->
                                     <td class="fw-semibold">
+
                                         @item.Subject
+
                                     </td>
 
                                     <!-- TYPE -->
                                     <td>
+
                                         <span class="badge bg-secondary">
+
                                             @item.TypeName
+
                                         </span>
+
                                     </td>
 
                                     <!-- COMPANY -->
                                     <td>
+
                                         @(item.CompanyName ?? "N/A")
+
                                     </td>
 
                                     <!-- CONTACT -->
                                     <td>
+
                                         @(item.ContactName ?? "N/A")
+
                                     </td>
 
                                     <!-- ASSIGNED -->
                                     <td>
+
                                         @item.AssignedTo
+
                                     </td>
 
                                     <!-- DUE DATE -->
                                     <td>
-                                        @(item.DueDate?.ToString("yyyy-MM-dd") ?? "-")
+
+                                        @(item.DueDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+
+                                        @if (item.DueDate < DateTime.Now
+                                                                               && !item.IsCompleted)
+                                        {
+                                            <span class="badge bg-danger ms-1">
+
+                                                Overdue
+
+                                            </span>
+                                        }
+
                                     </td>
 
                                     <!-- STATUS -->
@@ -147,7 +149,9 @@
                                         }
 
                                         <span class="badge @statusClass">
+
                                             @item.Status
+
                                         </span>
 
                                     </td>
@@ -157,24 +161,44 @@
 
                                         <div class="btn-group">
 
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
-
-                                                <i class="bi bi-pencil-square"></i>
-
-                                            </a>
-
+                                            <!-- DETAILS -->
                                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
 
                                                 <i class="bi bi-eye-fill"></i>
 
                                             </a>
 
-                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal" data-id="@item.Id">
+                                            <!-- EDIT -->
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
 
-                                                <i class="bi bi-trash-fill"></i>
+                                                <i class="bi bi-pencil-square"></i>
 
-                                            </button>
+                                            </a>
+
+                                            <!-- COMPLETE -->
+                                            @if (!item.IsCompleted)
+                                            {
+                                                <form asp-action="Complete" asp-route-id="@item.Id" method="post" class="d-inline">
+
+                                                    <button class="btn btn-sm btn-success">
+
+                                                        <i class="bi bi-check-circle"></i>
+
+                                                    </button>
+
+                                                </form>
+                                            }
+
+                                            <!-- CANCEL -->
+                                            <form asp-action="Cancel" asp-route-id="@item.Id" method="post" class="d-inline">
+
+                                                <button class="btn btn-sm btn-danger">
+
+                                                    <i class="bi bi-x-circle"></i>
+
+                                                </button>
+
+                                            </form>
 
                                         </div>
 
@@ -186,11 +210,13 @@
                         else
                         {
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
+
+                                <td colspan="8" class="text-center py-5 text-muted">
 
                                     No activities found.
 
                                 </td>
+
                             </tr>
                         }
 
@@ -206,88 +232,25 @@
 
 </div>
 
-@await Html.PartialAsync("_DeleteModal")
-
 @section Scripts {
 
     <script>
 
         $(document).ready(function () {
 
-            // SELECT2
-            $('.searchable-dropdown').select2({
-
-                theme: 'bootstrap-5',
-
-                width: '100%',
-
-                placeholder: 'Select',
-
-                allowClear: true
-
-            });
-
-            // DATATABLE
-            var table = $('#activityTable').DataTable({
+            $('#activityTable').DataTable({
 
                 responsive: true,
                 autoWidth: false,
-                orderCellsTop: true,
-                fixedHeader: true,
                 pageLength: 10,
-                order: [[5, 'desc']], // Due Date
+                order: [[5, 'desc']],
 
                 columnDefs: [
                     {
                         orderable: false,
                         targets: 7
                     }
-                ],
-
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search activities..."
-                }
-
-            });
-
-            // TEXT FILTERS
-            $('#activityTable thead tr:eq(0) th').each(function (i) {
-
-                $('input', this).on('keyup change', function () {
-
-                    if (table.column(i).search() !== this.value) {
-
-                        table
-                            .column(i)
-                            .search(this.value)
-                            .draw();
-
-                    }
-
-                });
-
-            });
-
-            // DROPDOWN FILTERS
-            $('#activityTable thead tr:eq(0) th').each(function (i) {
-
-                var select = $(this).find('select');
-
-                if (select.length > 0) {
-
-                    select.on('change', function () {
-
-                        var value = $.fn.dataTable.util.escapeRegex($(this).val());
-
-                        table
-                            .column(i)
-                            .search(value ? '^' + value + '$' : '', true, false)
-                            .draw();
-
-                    });
-
-                }
+                ]
 
             });
 

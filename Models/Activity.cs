@@ -7,49 +7,57 @@ namespace FanaCRM.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [Display(Name = "Activity Type")]
-        public int TypeId { get; set; }
-
-        public ActivityType Type { get; set; }
-
+        // BASIC INFO
         [Required]
         [StringLength(200)]
         public string Subject { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        // Related Account (Company)
-        [Display(Name = "Company")]
-        public int? CompanyId { get; set; }
-
-        public Company Company { get; set; }
-
-        // Related Contact
-        public int? ContactId { get; set; }
-
-        public Contact Contact { get; set; }
-
-        // Assigned User
+        // TYPE
         [Required]
-        [Display(Name = "Assigned To")]
-        public string AssignedTo { get; set; }
+        public int ActivityTypeId { get; set; }
+        public ActivityType ActivityType { get; set; }
 
-        [ForeignKey(nameof(AssignedTo))]
-        public Users User { get; set; }
+        // STATUS
+        [Required]
+        public int ActivityStatusId { get; set; }
+        public ActivityStatus ActivityStatus { get; set; }
 
-        [Display(Name = "Due Date")]
+        // RELATIONS
+        public int? LeadId { get; set; }
+        public Lead? Lead { get; set; }
+
+        public int? OpportunityId { get; set; }
+        public Opportunity? Opportunity { get; set; }
+
+        public int? ContactId { get; set; }
+        public Contact? Contact { get; set; }
+
+        public int? CompanyId { get; set; }
+        public Company? Company { get; set; }
+
+        // ASSIGNMENT
+        [Required]
+        public string AssignedToId { get; set; }
+
+        [ForeignKey(nameof(AssignedToId))]
+        public Users AssignedTo { get; set; }
+
+        // TRACKING
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         public DateTime? DueDate { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        public string Status { get; set; } // Open, Completed, Cancelled
+        public DateTime? CompletedAt { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public bool IsCompleted { get; set; } = false;
 
-        // 🔹 Related Lead
-        public int? LeadId { get; set; }
+        // AUDIT
+        public string? CreatedById { get; set; }
 
-        public Lead Lead { get; set; }
+        public string? UpdatedById { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }

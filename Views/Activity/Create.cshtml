@@ -2,96 +2,231 @@
 
 @{
     ViewData["Title"] = "Create Activity";
+
 }
 
-<div class="container mt-4">
-    <div class="card shadow-sm">
+<div class="container-fluid mt-4">
 
+    <div class="card shadow border-0">
+
+        <!-- HEADER -->
         <div class="card-header bg-primary text-white">
-            <h5>Create Activity</h5>
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h4 class="mb-0">
+
+                    <i class="bi bi-plus-circle"></i>
+                    Create Activity
+
+                </h4>
+
+                <a asp-action="Index" class="btn btn-light btn-sm">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+
+                </a>
+
+            </div>
+
         </div>
 
+        <!-- BODY -->
         <div class="card-body">
+
             <form asp-action="Create" method="post">
 
-                <!-- Type -->
-                <div class="mb-3">
-                    <label asp-for="TypeId" class="form-label"></label>
-                    <select asp-for="TypeId" asp-items="Model.Types" class="form-select">
-                        <option value="">-- Select Type --</option>
-                    </select>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger">
                 </div>
 
-                <!-- Subject -->
-                <div class="mb-3">
-                    <label asp-for="Subject"></label>
-                    <input asp-for="Subject" class="form-control" />
-                </div>
+                <div class="row">
 
-                <!-- Description -->
-                <div class="mb-3">
-                    <label asp-for="Description"></label>
-                    <textarea asp-for="Description" class="form-control"></textarea>
-                </div>
+                    <!-- TYPE -->
+                    <div class="col-md-6 mb-3">
 
-                <!-- Company -->
-                <div class="mb-3">
-                    <label asp-for="CompanyId"></label>
-                    <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select">
-                        <option value="">-- Select Company --</option>
-                    </select>
-                </div>
+                        <label asp-for="TypeId" class="form-label fw-semibold">
+                        </label>
 
-                <!-- Contact -->
-                <div class="mb-3">
-                    <label asp-for="ContactId"></label>
-                    <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select">
-                        <option value="">-- Select Contact --</option>
-                    </select>
-                </div>
+                        <select asp-for="TypeId" asp-items="Model.Types" class="form-select searchable-dropdown">
 
+                            <option value="">-- Select Type --</option>
 
-                <!-- Assigned -->
-                <div class="mb-3">
-                    <label asp-for="AssignedTo"></label>
-                    <select asp-for="AssignedTo" asp-items="Model.Users" class="form-select">
-                        <option value="">-- Select User --</option>
-                    </select>
-                </div>
-                <!-- Lead -->
-                <div class="mb-3">
-                    <label asp-for="LeadId"></label>
-                    <select asp-for="LeadId" asp-items="Model.Leads" class="form-control">
-                        <option value="">-- Select Lead --</option>
-                    </select>
-                </div>
+                        </select>
 
-                <!-- Due Date -->
-                <div class="mb-3">
-                    <label asp-for="DueDate"></label>
-                    <input asp-for="DueDate" type="date" class="form-control" />
-                </div>
+                        <span asp-validation-for="TypeId" class="text-danger">
+                        </span>
 
-                <!-- Status -->
-                <div class="mb-3">
-                    <label asp-for="Status"></label>
-                    <select asp-for="Status" class="form-select">
-                        <option value="Open">Open</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                </div>
+                    </div>
 
-                <div class="d-flex justify-content-between">
-                    <a asp-action="Index" class="btn btn-secondary">Back</a>
-                    <button class="btn btn-primary">Save</button>
-                </div>
+                    <!-- STATUS -->
+                    <div class="col-md-6 mb-3">
 
-            </form>
+                        <label asp-for="StatusId" class="form-label fw-semibold">
+                        </label>
+
+                        <select asp-for="StatusId" asp-items="Model.Statuses" class="form-select searchable-dropdown">
+
+                            <option value="">-- Select Status --</option>
+
+                        </select>
+
+                        <span asp-validation-for="StatusId" class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- SUBJECT -->
+                    <div class="col-12 mb-3">
+
+                        <label asp-for="Subject" class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="Subject" class="form-control" placeholder="Enter activity subject..." />
+
+                        <span asp-validation-for="Subject" class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="col-12 mb-3">
+
+                        <label asp-for="Description" class="form-label fw-semibold">
+                        </label>
+
+                        <textarea asp-for="Description" rows="4" class="form-control"
+                                      placeholder="Write activity notes...">
+                        </textarea>
+
+                        </div>
+
+                        <!-- COMPANY -->
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="CompanyId" class="form-label fw-semibold">
+                            </label>
+
+                            <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select searchable-dropdown">
+
+                                <option value="">-- Select Company --</option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="ContactId" class="form-label fw-semibold">
+                            </label>
+
+                            <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select searchable-dropdown">
+
+                                <option value="">-- Select Contact --</option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- LEAD -->
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="LeadId" class="form-label fw-semibold">
+                            </label>
+
+                            <select asp-for="LeadId" asp-items="Model.Leads" class="form-select searchable-dropdown">
+
+                                <option value="">-- Select Lead --</option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- OPPORTUNITY -->
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="OpportunityId" class="form-label fw-semibold">
+                            </label>
+
+                            <select asp-for="OpportunityId" asp-items="Model.Opportunities"
+                                    class="form-select searchable-dropdown">
+
+                                <option value="">-- Select Opportunity --</option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- ASSIGNED TO -->
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="AssignedToId" class="form-label fw-semibold">
+                            </label>
+
+                            <select asp-for="AssignedToId" asp-items="Model.Users" class="form-select searchable-dropdown">
+
+                                <option value="">-- Select User --</option>
+
+                            </select>
+
+                            <span asp-validation-for="AssignedToId" class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <!-- DUE DATE -->
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="DueDate" class="form-label fw-semibold">
+                            </label>
+
+                            <input asp-for="DueDate" type="datetime-local" class="form-control" />
+
+                        </div>
+
+                    </div>
+
+                    <hr />
+
+                    <div class="text-end">
+
+                        <button type="submit" class="btn btn-primary px-4">
+
+                            <i class="bi bi-check-circle"></i>
+                            Save Activity
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
-    </div>
-</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+    </div>
+
+    @section Scripts {
+
+        <partial name="_ValidationScriptsPartial" />
+
+        <script>
+
+            $(document).ready(function () {
+
+                $('.searchable-dropdown').select2({
+
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                    placeholder: 'Select option',
+                    allowClear: true
+
+                });
+
+            });
+
+        </script>
+
+    }

@@ -132,7 +132,7 @@
                                         {
                                             <a href="@item.Website" target="_blank" class="text-decoration-none">
 
-                                                Visit Website
+                                                @item.Website
 
                                             </a>
                                         }
@@ -348,10 +348,10 @@
                 // FILTER EVENT
                 select.on('change', function () {
 
-                    var value = $.fn.dataTable.util.escapeRegex($(this).val());
+                    var value = $(this).val();
 
                     column
-                        .search(value ? '^' + value + '$' : '', true, false)
+                        .search(value)
                         .draw();
 
                 });

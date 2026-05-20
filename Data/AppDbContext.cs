@@ -22,7 +22,9 @@ namespace FanaCRM.Data
         public DbSet<OpportunityStage> OpportunityStages { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<ActivityType> ActivityTypes { get; set; }
+        public DbSet<ActivityStatus> ActivityStatuses { get; set; }
         public DbSet<OpportunityStageHistory> OpportunityStageHistories { get; set; }
+        public DbSet<TimelineEvent> TimelineEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,11 +44,11 @@ namespace FanaCRM.Data
                 .HasForeignKey(o => o.AssignedTo)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Activity>()
-                .HasOne(a => a.User)
-                .WithMany(u => u.Activities)
-                .HasForeignKey(a => a.AssignedTo)
-                .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<Activity>()
+            //     .HasOne(a => a.User)
+            //     .WithMany(u => u.Activities)
+            //     .HasForeignKey(a => a.AssignedTo)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
             // Lead - LeadSource and LeadStatus relationships
             modelBuilder.Entity<Lead>()
@@ -89,11 +91,12 @@ namespace FanaCRM.Data
                 .WithMany(p => p.OpportunityProducts)
                 .HasForeignKey(op => op.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
             // 🔹 Activity Relationships
-            modelBuilder.Entity<Activity>()
-                .HasOne(a => a.Type)
-                .WithMany(t => t.Activities)
-                .HasForeignKey(a => a.TypeId);
+            // modelBuilder.Entity<Activity>()
+            //     .HasOne(a => a.Type)
+            //     .WithMany(t => t.Activities)
+            //     .HasForeignKey(a => a.TypeId);
 
             modelBuilder.Entity<Activity>()
                 .HasOne(a => a.Company)
@@ -131,6 +134,8 @@ namespace FanaCRM.Data
              );
             modelBuilder.Entity<Product>()
                     .HasQueryFilter(p => !p.IsDeleted);
+            modelBuilder.Entity<OpportunityProduct>()
+                    .HasQueryFilter(op => !op.Product.IsDeleted);
             modelBuilder.Entity<ActivityType>().HasData(
                     new ActivityType { Id = 1, Name = "Call" },
                     new ActivityType { Id = 2, Name = "Meeting" },
@@ -138,6 +143,37 @@ namespace FanaCRM.Data
                     new ActivityType { Id = 4, Name = "Task" }
                 );
             modelBuilder.Entity<OpportunityStageHistory>();
+            modelBuilder.Entity<LeadSource>().HasData(
+            new LeadSource { Id = 1, Name = "Website" },
+            new LeadSource { Id = 2, Name = "Referral" },
+            new LeadSource { Id = 3, Name = "Advertisement" }
+        );
+
+            // Seed LeadStatuses
+            modelBuilder.Entity<LeadStatus>().HasData(
+                new LeadStatus { Id = 1, Name = "New" },
+                new LeadStatus { Id = 2, Name = "Contacted" },
+                new LeadStatus { Id = 3, Name = "Qualified" },
+                new LeadStatus { Id = 4, Name = "Lost" }
+            );
+            modelBuilder.Entity<ActivityStatus>().HasData(
+                new ActivityStatus { Id = 1, Name = "Pending" },
+                new ActivityStatus { Id = 2, Name = "In Progress" },
+                new ActivityStatus { Id = 3, Name = "Completed" },
+                new ActivityStatus { Id = 4, Name = "Cancelled" },
+                new ActivityStatus { Id = 5, Name = "Overdue" }
+            );
+
+            modelBuilder.Entity<TimelineEvent>()
+                    .HasOne(t => t.Activity)
+                    .WithMany()
+                    .HasForeignKey(t => t.ActivityId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TimelineEvent>()
+                    .HasOne(t => t.User)
+                    .WithMany()
+                    .HasForeignKey(t => t.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

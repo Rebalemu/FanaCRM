@@ -4,6 +4,7 @@ using FanaCRM.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FanaCRM.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260515084746_SeedLeadTables")]
+    partial class SeedLeadTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,34 +118,7 @@ namespace FanaCRM.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ActivityStatuses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Pending"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "In Progress"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Completed"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Cancelled"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Overdue"
-                        });
+                    b.ToTable("ActivityStatus");
                 });
 
             modelBuilder.Entity("FanaCRM.Models.ActivityType", b =>
@@ -723,10 +699,13 @@ namespace FanaCRM.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ActivityId")
+                    b.Property<int?>("CompanyId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<int?>("ContactId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -734,8 +713,7 @@ namespace FanaCRM.Migrations
 
                     b.Property<string>("EventType")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("LeadId")
                         .HasColumnType("int");
@@ -745,22 +723,12 @@ namespace FanaCRM.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ActivityId");
-
-                    b.HasIndex("LeadId");
-
-                    b.HasIndex("OpportunityId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("TimelineEvents");
                 });
@@ -1140,36 +1108,6 @@ namespace FanaCRM.Migrations
                     b.Navigation("Opportunity");
 
                     b.Navigation("Stage");
-                });
-
-            modelBuilder.Entity("FanaCRM.Models.TimelineEvent", b =>
-                {
-                    b.HasOne("FanaCRM.Models.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("FanaCRM.Models.Lead", "Lead")
-                        .WithMany()
-                        .HasForeignKey("LeadId");
-
-                    b.HasOne("FanaCRM.Models.Opportunity", "Opportunity")
-                        .WithMany()
-                        .HasForeignKey("OpportunityId");
-
-                    b.HasOne("FanaCRM.Models.Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("Lead");
-
-                    b.Navigation("Opportunity");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

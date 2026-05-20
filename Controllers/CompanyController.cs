@@ -25,8 +25,8 @@ namespace FanaCRM.Controllers
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(c =>
-                    c.Name.Contains(search) ||
-                    c.Industry.Contains(search));
+                                    (c.Name != null && c.Name.Contains(search)) ||
+                                    (c.Industry != null && c.Industry.Contains(search)));
             }
 
             var companies = await query

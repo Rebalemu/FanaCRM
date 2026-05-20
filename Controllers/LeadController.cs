@@ -1,5 +1,6 @@
 using FanaCRM.Data;
 using FanaCRM.Models;
+using FanaCRM.Services.Interfaces;
 using FanaCRM.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -16,12 +17,14 @@ namespace FanaCRM.Controllers
         private readonly AppDbContext _context;
         private readonly UserManager<Users> _userManager;
         private readonly ILeadService _leadService;
+        private readonly ITimelineService _timelineService;
 
-        public LeadController(AppDbContext context, UserManager<Users> userManager, ILeadService leadService)
+        public LeadController(AppDbContext context, UserManager<Users> userManager, ILeadService leadService, ITimelineService timelineService)
         {
             _context = context;
             _userManager = userManager;
             _leadService = leadService;
+            _timelineService = timelineService;
         }
         public async Task<IActionResult> Index(string search, int? statusId)
         {
@@ -139,6 +142,15 @@ namespace FanaCRM.Controllers
             };
             _context.Leads.Add(lead);
             await _context.SaveChangesAsync();
+            var userId = _userManager.GetUserId(User);
+
+            await _timelineService.AddEventAsync(
+                title: "Lead Created",
+                description: $"{lead.FullName} was created",
+                eventType: "Lead",
+                userId: userId,
+                leadId: lead.Id
+            );
 
             return RedirectToAction("Index");
         }
@@ -184,43 +196,147 @@ namespace FanaCRM.Controllers
 
             return View(vm);
         }
-        [HttpPost]
+                [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(LeadEditVM vm)
         {
             if (!ModelState.IsValid)
             {
-                // reload dropdowns
                 vm.Sources = await _context.LeadSources
-                    .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
-                    .ToListAsync();
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToListAsync();
 
                 vm.Statuses = await _context.LeadStatuses
-                    .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Name })
-                    .ToListAsync();
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id.ToString(),
+                        Text = x.Name
+                    }).ToListAsync();
 
                 vm.Users = await _userManager.Users
-                    .Select(x => new SelectListItem { Value = x.Id, Text = x.FullName })
-                    .ToListAsync();
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.Id,
+                        Text = x.FullName
+                    }).ToListAsync();
 
                 return View(vm);
             }
 
-            var lead = await _context.Leads.FindAsync(vm.Id);
+            var lead = await _context.Leads
+                .Include(l => l.Status)
+                .Include(l => l.Source)
+                .FirstOrDefaultAsync(l => l.Id == vm.Id);
+
             if (lead == null)
                 return NotFound();
 
-            // update fields
-            lead.FullName = vm.FullName;
-            lead.Email = vm.Email;
-            lead.Phone = vm.Phone;
-            lead.Company = vm.Company;
-            lead.SourceId = vm.SourceId;
-            lead.StatusId = vm.StatusId;
-            lead.AssignedTo = string.IsNullOrEmpty(vm.AssignedTo) ? null : vm.AssignedTo;
+            var userId = _userManager.GetUserId(User);
 
-            _context.Update(lead);
+            // =========================================
+            // TRACK CHANGES
+            // =========================================
+
+            var changes = new List<string>();
+
+            // FULL NAME
+            if (lead.FullName != vm.FullName)
+            {
+                changes.Add(
+                    $"Full Name changed from '{lead.FullName}' to '{vm.FullName}'");
+
+                lead.FullName = vm.FullName;
+            }
+
+            // EMAIL
+            if (lead.Email != vm.Email)
+            {
+                changes.Add(
+                    $"Email changed from '{lead.Email}' to '{vm.Email}'");
+
+                lead.Email = vm.Email;
+            }
+
+            // PHONE
+            if (lead.Phone != vm.Phone)
+            {
+                changes.Add(
+                    $"Phone changed from '{lead.Phone}' to '{vm.Phone}'");
+
+                lead.Phone = vm.Phone;
+            }
+
+            // COMPANY
+            if (lead.Company != vm.Company)
+            {
+                changes.Add(
+                    $"Company changed from '{lead.Company}' to '{vm.Company}'");
+
+                lead.Company = vm.Company;
+            }
+
+            // STATUS
+            if (lead.StatusId != vm.StatusId)
+            {
+                var oldStatus = lead.Status?.Name;
+
+                var newStatus = await _context.LeadStatuses
+                    .Where(s => s.Id == vm.StatusId)
+                    .Select(s => s.Name)
+                    .FirstOrDefaultAsync();
+
+                changes.Add(
+                    $"Status changed from '{oldStatus}' to '{newStatus}'");
+
+                lead.StatusId = vm.StatusId;
+            }
+
+            // SOURCE
+            if (lead.SourceId != vm.SourceId)
+            {
+                var oldSource = lead.Source?.Name;
+
+                var newSource = await _context.LeadSources
+                    .Where(s => s.Id == vm.SourceId)
+                    .Select(s => s.Name)
+                    .FirstOrDefaultAsync();
+
+                changes.Add(
+                    $"Source changed from '{oldSource}' to '{newSource}'");
+
+                lead.SourceId = vm.SourceId;
+            }
+
+            // ASSIGNED USER
+            if (lead.AssignedTo != vm.AssignedTo)
+            {
+                changes.Add("Assigned user changed");
+
+                lead.AssignedTo = vm.AssignedTo;
+            }
+
+            // SAVE LEAD
             await _context.SaveChangesAsync();
+
+            // =========================================
+            // CREATE TIMELINE EVENTS
+            // =========================================
+
+            foreach (var change in changes)
+            {
+                await _timelineService.AddEventAsync(
+                    title: "Lead Updated",
+                    description: change,
+                    eventType: "Lead",
+                    userId: userId,
+                    leadId: lead.Id
+                );
+            }
+
+            TempData["Success"] = "Lead updated successfully";
 
             return RedirectToAction(nameof(Index));
         }
@@ -243,7 +359,10 @@ namespace FanaCRM.Controllers
         {
             try
             {
-                var opportunityId = await _leadService.ConvertLeadAsync(id);
+                var userId = _userManager.GetUserId(User);
+
+                var opportunityId =
+                    await _leadService.ConvertLeadAsync(id, userId);
 
                 return RedirectToAction("Details", "Opportunity", new { id = opportunityId });
             }
@@ -253,6 +372,98 @@ namespace FanaCRM.Controllers
                 return RedirectToAction("Index");
             }
         }
+                public async Task<IActionResult> Details(int id)
+        {
+            var lead = await _context.Leads
+                .Include(l => l.Source)
+                .Include(l => l.Status)
+                .Include(l => l.User)
+                .FirstOrDefaultAsync(l => l.Id == id);
 
+            if (lead == null)
+                return NotFound();
+
+            // =========================================
+            // TIMELINE
+            // =========================================
+
+            var timeline = await _timelineService
+                .GetLeadTimelineAsync(id);
+
+            // =========================================
+            // UPCOMING ACTIVITIES
+            // =========================================
+
+            var activities = await _context.Activities
+                .Include(a => a.ActivityType)
+                .Include(a => a.ActivityStatus)
+                .Where(a =>
+                    a.LeadId == id &&
+                    !a.IsCompleted)
+                .OrderBy(a => a.DueDate)
+                .Take(5)
+                .Select(a => new ActivityWidgetVM
+                {
+                    Id = a.Id,
+
+                    Subject = a.Subject,
+
+                    Type = a.ActivityType.Name,
+
+                    Status = a.ActivityStatus.Name,
+
+                    DueDate = a.DueDate,
+
+                    IsOverdue =
+                        a.DueDate.HasValue &&
+                        a.DueDate < DateTime.Now &&
+                        !a.IsCompleted
+                })
+                .ToListAsync();
+
+            // =========================================
+            // VIEWMODEL
+            // =========================================
+
+            var vm = new LeadDetailsVM
+            {
+                Id = lead.Id,
+
+                FullName = lead.FullName,
+
+                Email = lead.Email,
+
+                Phone = lead.Phone,
+
+                Company = lead.Company,
+
+                Status = lead.Status.Name,
+
+                Source = lead.Source.Name,
+
+                AssignedTo = lead.User != null
+                    ? lead.User.FullName
+                    : "Unassigned",
+
+                CreatedDate = lead.CreatedDate,
+
+                Timeline = timeline.Select(t => new TimelineEventVM
+                {
+                    Title = t.Title,
+
+                    Description = t.Description,
+
+                    EventType = t.EventType,
+
+                    UserName = t.User.FullName,
+
+                    CreatedDate = t.CreatedDate
+                }).ToList(),
+
+                UpcomingActivities = activities
+            };
+
+            return View(vm);
+        }
     }
 }

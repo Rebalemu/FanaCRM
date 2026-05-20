@@ -14,8 +14,7 @@ namespace FanaCRM.Models
 
         [Required]
         public int ProductId { get; set; }
-
-        public Product Product { get; set; }
+        public Product? Product { get; set; }
 
         [Required]
         [Range(1, 100000)]

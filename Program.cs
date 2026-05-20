@@ -32,6 +32,8 @@ builder.Services.AddScoped<LeadAutomationService>();
 builder.Services.AddHostedService<LeadStaleWorker>();
 builder.Services.AddScoped<ISalesDashboardService, SalesDashboardService>();
 builder.Services.AddScoped<IOpportunityService, OpportunityService>();
+builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<ITimelineService, TimelineService>();
 
 // Ridirect Unauthorized users to forbidden page
 

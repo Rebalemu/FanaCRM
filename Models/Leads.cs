@@ -45,6 +45,9 @@ namespace FanaCRM.Models
 
         public DateTime? LastActivityDate { get; set; }
         public DateTime? LastContactedDate { get; set; }
+        public int? OpportunityId { get; set; }
+
+        public Opportunity? Opportunity { get; set; }
 
 
         public ICollection<Activity> Activities { get; set; }

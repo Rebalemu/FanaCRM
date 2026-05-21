@@ -51,6 +51,11 @@ namespace FanaCRM.Models
         [StringLength(1000)]
         public string? LossReason { get; set; }
 
+        // Relation
+        public int? LeadId { get; set; }
+
+        public Lead? Lead { get; set; }
+
         public ICollection<OpportunityProduct> Products { get; set; } = new List<OpportunityProduct>();
     }
 }

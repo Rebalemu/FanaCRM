@@ -64,5 +64,9 @@ namespace FanaCRM.ViewModels
         // PRODUCTS
         // =========================
         public List<OpportunityProductVM> Products { get; set; } = new();
+        public List<ActivityWidgetVM> UpcomingActivities { get; set; }
+    = new();
+        public List<TimelineEventVM> Timeline { get; set; }
+    = new();
     }
 }

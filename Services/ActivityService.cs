@@ -10,10 +10,14 @@ namespace FanaCRM.Services
     public class ActivityService : IActivityService
     {
         private readonly AppDbContext _context;
+        private readonly ITimelineService _timelineService;
 
-        public ActivityService(AppDbContext context)
+        public ActivityService(
+            AppDbContext context,
+            ITimelineService timelineService)
         {
             _context = context;
+            _timelineService = timelineService;
         }
 
         // =========================================================
@@ -22,7 +26,7 @@ namespace FanaCRM.Services
 
         public async Task<List<ActivityIndexVM>> GetAllAsync()
         {
-            var activities = await _context.Activities
+            return await _context.Activities
                 .Include(a => a.ActivityType)
                 .Include(a => a.ActivityStatus)
                 .Include(a => a.Company)
@@ -34,7 +38,6 @@ namespace FanaCRM.Services
                 .Select(a => new ActivityIndexVM
                 {
                     Id = a.Id,
-
                     Subject = a.Subject,
 
                     TypeName = a.ActivityType.Name,
@@ -64,8 +67,6 @@ namespace FanaCRM.Services
                     IsCompleted = a.IsCompleted
                 })
                 .ToListAsync();
-
-            return activities;
         }
 
         // =========================================================
@@ -74,7 +75,7 @@ namespace FanaCRM.Services
 
         public async Task<ActivityDetailsVM?> GetDetailsAsync(int id)
         {
-            var activity = await _context.Activities
+            return await _context.Activities
                 .Include(a => a.ActivityType)
                 .Include(a => a.ActivityStatus)
                 .Include(a => a.Company)
@@ -122,8 +123,6 @@ namespace FanaCRM.Services
                     CompletedAt = a.CompletedAt
                 })
                 .FirstOrDefaultAsync();
-
-            return activity;
         }
 
         // =========================================================
@@ -136,7 +135,6 @@ namespace FanaCRM.Services
 
             await LoadDropdowns(vm);
 
-            // Default Status = Open
             var openStatus = await _context.ActivityStatuses
                 .FirstOrDefaultAsync(x => x.Name == "Open");
 
@@ -152,8 +150,26 @@ namespace FanaCRM.Services
         // CREATE
         // =========================================================
 
-        public async Task CreateAsync(ActivityFormVM vm, string userId)
+        public async Task CreateAsync(
+            ActivityFormVM vm,
+            string userId)
         {
+            // =====================================
+            // BLOCK ACTIVITIES ON CONVERTED LEADS
+            // =====================================
+
+            if (vm.LeadId.HasValue)
+            {
+                var lead = await _context.Leads
+                    .FirstOrDefaultAsync(x => x.Id == vm.LeadId);
+
+                if (lead != null && lead.IsConverted)
+                {
+                    throw new Exception(
+                        "Cannot create activity for converted lead.");
+                }
+            }
+
             var activity = new Activity
             {
                 Subject = vm.Subject,
@@ -186,6 +202,27 @@ namespace FanaCRM.Services
             _context.Activities.Add(activity);
 
             await _context.SaveChangesAsync();
+
+            // =====================================
+            // TIMELINE
+            // =====================================
+
+            await _timelineService.AddEventAsync(
+                title: "Activity Created",
+
+                description:
+                    $"{activity.Subject} scheduled.",
+
+                eventType: "Activity",
+
+                userId: userId,
+
+                leadId: activity.LeadId,
+
+                opportunityId: activity.OpportunityId,
+
+                activityId: activity.Id
+            );
         }
 
         // =========================================================
@@ -234,13 +271,31 @@ namespace FanaCRM.Services
         // UPDATE
         // =========================================================
 
-        public async Task UpdateAsync(ActivityFormVM vm, string userId)
+        public async Task UpdateAsync(
+            ActivityFormVM vm,
+            string userId)
         {
             var activity = await _context.Activities
                 .FirstOrDefaultAsync(a => a.Id == vm.Id);
 
             if (activity == null)
                 return;
+
+            // =====================================
+            // BLOCK CONVERTED LEADS
+            // =====================================
+
+            if (vm.LeadId.HasValue)
+            {
+                var lead = await _context.Leads
+                    .FirstOrDefaultAsync(x => x.Id == vm.LeadId);
+
+                if (lead != null && lead.IsConverted)
+                {
+                    throw new Exception(
+                        "Converted leads are read-only.");
+                }
+            }
 
             activity.Subject = vm.Subject;
 
@@ -267,13 +322,36 @@ namespace FanaCRM.Services
             activity.UpdatedById = userId;
 
             await _context.SaveChangesAsync();
+
+            // =====================================
+            // TIMELINE
+            // =====================================
+
+            await _timelineService.AddEventAsync(
+                title: "Activity Updated",
+
+                description:
+                    $"{activity.Subject} updated.",
+
+                eventType: "Activity",
+
+                userId: userId,
+
+                leadId: activity.LeadId,
+
+                opportunityId: activity.OpportunityId,
+
+                activityId: activity.Id
+            );
         }
 
         // =========================================================
         // COMPLETE
         // =========================================================
 
-        public async Task CompleteAsync(int id)
+        public async Task CompleteAsync(
+            int id,
+            string userId)
         {
             var activity = await _context.Activities
                 .FirstOrDefaultAsync(a => a.Id == id);
@@ -281,10 +359,8 @@ namespace FanaCRM.Services
             if (activity == null)
                 return;
 
-            var completedStatusId = await _context.ActivityStatuses
-                .Where(x => x.Name == "Completed")
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
+            var completedStatusId =
+                await GetStatusIdAsync("Completed");
 
             activity.IsCompleted = true;
 
@@ -293,13 +369,36 @@ namespace FanaCRM.Services
             activity.ActivityStatusId = completedStatusId;
 
             await _context.SaveChangesAsync();
+
+            // =====================================
+            // TIMELINE
+            // =====================================
+
+            await _timelineService.AddEventAsync(
+                title: "Activity Completed",
+
+                description:
+                    $"{activity.Subject} completed.",
+
+                eventType: "Activity",
+
+                userId: userId,
+
+                leadId: activity.LeadId,
+
+                opportunityId: activity.OpportunityId,
+
+                activityId: activity.Id
+            );
         }
 
         // =========================================================
         // CANCEL
         // =========================================================
 
-        public async Task CancelAsync(int id)
+        public async Task CancelAsync(
+            int id,
+            string userId)
         {
             var activity = await _context.Activities
                 .FirstOrDefaultAsync(a => a.Id == id);
@@ -307,14 +406,45 @@ namespace FanaCRM.Services
             if (activity == null)
                 return;
 
-            var cancelledStatusId = await _context.ActivityStatuses
-                .Where(x => x.Name == "Cancelled")
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
+            var cancelledStatusId =
+                await GetStatusIdAsync("Cancelled");
 
             activity.ActivityStatusId = cancelledStatusId;
 
             await _context.SaveChangesAsync();
+
+            // =====================================
+            // TIMELINE
+            // =====================================
+
+            await _timelineService.AddEventAsync(
+                title: "Activity Cancelled",
+
+                description:
+                    $"{activity.Subject} cancelled.",
+
+                eventType: "Activity",
+
+                userId: userId,
+
+                leadId: activity.LeadId,
+
+                opportunityId: activity.OpportunityId,
+
+                activityId: activity.Id
+            );
+        }
+
+        // =========================================================
+        // STATUS HELPER
+        // =========================================================
+
+        private async Task<int> GetStatusIdAsync(string name)
+        {
+            return await _context.ActivityStatuses
+                .Where(x => x.Name == name)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
         }
 
         // =========================================================
@@ -323,7 +453,6 @@ namespace FanaCRM.Services
 
         public async Task LoadDropdowns(ActivityFormVM vm)
         {
-            // TYPES
             vm.Types = await _context.ActivityTypes
                 .Select(x => new SelectListItem
                 {
@@ -332,7 +461,6 @@ namespace FanaCRM.Services
                 })
                 .ToListAsync();
 
-            // STATUSES
             vm.Statuses = await _context.ActivityStatuses
                 .Select(x => new SelectListItem
                 {
@@ -341,7 +469,6 @@ namespace FanaCRM.Services
                 })
                 .ToListAsync();
 
-            // COMPANIES
             vm.Companies = await _context.Companies
                 .Select(x => new SelectListItem
                 {
@@ -350,7 +477,6 @@ namespace FanaCRM.Services
                 })
                 .ToListAsync();
 
-            // CONTACTS
             vm.Contacts = await _context.Contacts
                 .Select(x => new SelectListItem
                 {
@@ -359,8 +485,10 @@ namespace FanaCRM.Services
                 })
                 .ToListAsync();
 
-            // LEADS
+            // ONLY NON-CONVERTED LEADS
+
             vm.Leads = await _context.Leads
+                .Where(x => !x.IsConverted)
                 .Select(x => new SelectListItem
                 {
                     Value = x.Id.ToString(),
@@ -368,7 +496,6 @@ namespace FanaCRM.Services
                 })
                 .ToListAsync();
 
-            // OPPORTUNITIES
             vm.Opportunities = await _context.Opportunities
                 .Select(x => new SelectListItem
                 {
@@ -377,7 +504,6 @@ namespace FanaCRM.Services
                 })
                 .ToListAsync();
 
-            // USERS
             vm.Users = await _context.Users
                 .Select(x => new SelectListItem
                 {
@@ -386,26 +512,38 @@ namespace FanaCRM.Services
                 })
                 .ToListAsync();
         }
+
+        // =========================================================
+        // DASHBOARD
+        // =========================================================
+
         public async Task<ActivityDashboardVM> GetDashboardAsync(string userId)
         {
-            var today = DateTime.Today;
+            var today = DateTime.Now.Date;
 
             var activities = await _context.Activities
+                .AsNoTracking()
                 .Include(a => a.ActivityType)
                 .Include(a => a.ActivityStatus)
                 .Include(a => a.Company)
                 .Include(a => a.Contact)
+                .Include(a => a.Lead)
+                .Include(a => a.Opportunity)
                 .Include(a => a.AssignedTo)
-                .Where(a => a.AssignedToId == userId)
+
+                // REMOVE THIS TEMPORARILY
+                //.Where(a => a.AssignedToId == userId)
+
                 .OrderByDescending(a => a.CreatedAt)
                 .ToListAsync();
 
-            var vm = new ActivityDashboardVM
+            return new ActivityDashboardVM
             {
                 TotalActivities = activities.Count,
 
                 PendingActivities = activities.Count(a =>
                     !a.IsCompleted &&
+                    a.ActivityStatus != null &&
                     a.ActivityStatus.Name != "Cancelled"),
 
                 CompletedToday = activities.Count(a =>
@@ -415,7 +553,9 @@ namespace FanaCRM.Services
                 OverdueActivities = activities.Count(a =>
                     !a.IsCompleted &&
                     a.DueDate.HasValue &&
-                    a.DueDate.Value.Date < today),
+                    a.DueDate.Value.Date < today &&
+                    a.ActivityStatus != null &&
+                    a.ActivityStatus.Name != "Cancelled"),
 
                 MyActivities = activities
                     .Take(10)
@@ -426,7 +566,9 @@ namespace FanaCRM.Services
                     .Where(a =>
                         !a.IsCompleted &&
                         a.DueDate.HasValue &&
-                        a.DueDate.Value.Date >= today)
+                        a.DueDate.Value.Date >= today &&
+                        a.ActivityStatus != null &&
+                        a.ActivityStatus.Name != "Cancelled")
                     .OrderBy(a => a.DueDate)
                     .Take(10)
                     .Select(MapActivity)
@@ -436,7 +578,9 @@ namespace FanaCRM.Services
                     .Where(a =>
                         !a.IsCompleted &&
                         a.DueDate.HasValue &&
-                        a.DueDate.Value.Date < today)
+                        a.DueDate.Value.Date < today &&
+                        a.ActivityStatus != null &&
+                        a.ActivityStatus.Name != "Cancelled")
                     .OrderBy(a => a.DueDate)
                     .Take(10)
                     .Select(MapActivity)
@@ -451,9 +595,11 @@ namespace FanaCRM.Services
                     .Select(MapActivity)
                     .ToList()
             };
-
-            return vm;
         }
+        // =========================================================
+        // MAP
+        // =========================================================
+
         private static ActivityIndexVM MapActivity(Activity a)
         {
             return new ActivityIndexVM
@@ -462,17 +608,21 @@ namespace FanaCRM.Services
 
                 Subject = a.Subject,
 
-                TypeName = a.ActivityType.Name,
+                TypeName = a.ActivityType?.Name ?? "-",
 
                 CompanyName = a.Company?.Name,
 
                 ContactName = a.Contact?.FullName,
 
-                AssignedTo = a.AssignedTo.FullName,
+                LeadName = a.Lead?.FullName,
+
+                OpportunityName = a.Opportunity?.Name,
+
+                AssignedTo = a.AssignedTo?.FullName ?? "-",
 
                 DueDate = a.DueDate,
 
-                Status = a.ActivityStatus.Name,
+                Status = a.ActivityStatus?.Name ?? "-",
 
                 IsCompleted = a.IsCompleted
             };

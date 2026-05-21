@@ -37,6 +37,11 @@ namespace FanaCRM.Data
                 .WithMany(u => u.Leads)
                 .HasForeignKey(l => l.AssignedTo)
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Lead>()
+    .HasOne(l => l.Opportunity)
+    .WithOne(o => o.Lead)
+    .HasForeignKey<Lead>(l => l.OpportunityId)
+    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Opportunity>()
                 .HasOne(o => o.User)
@@ -174,6 +179,7 @@ namespace FanaCRM.Data
                     .WithMany()
                     .HasForeignKey(t => t.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

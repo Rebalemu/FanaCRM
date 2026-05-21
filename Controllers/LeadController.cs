@@ -160,6 +160,14 @@ namespace FanaCRM.Controllers
             var lead = await _context.Leads.FindAsync(id);
             if (lead == null)
                 return NotFound();
+            // prevent editing converted leads
+            if (lead.IsConverted)
+            {
+                TempData["Error"] =
+                    "Converted leads cannot be edited.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
 
             var vm = new LeadEditVM
             {
@@ -196,10 +204,11 @@ namespace FanaCRM.Controllers
 
             return View(vm);
         }
-                [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(LeadEditVM vm)
         {
+
             if (!ModelState.IsValid)
             {
                 vm.Sources = await _context.LeadSources
@@ -233,6 +242,12 @@ namespace FanaCRM.Controllers
 
             if (lead == null)
                 return NotFound();
+            // prevent editing converted leads
+            if (lead.IsConverted)
+            {
+                return BadRequest(
+                    "Converted leads cannot be modified.");
+            }
 
             var userId = _userManager.GetUserId(User);
 
@@ -372,7 +387,7 @@ namespace FanaCRM.Controllers
                 return RedirectToAction("Index");
             }
         }
-                public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var lead = await _context.Leads
                 .Include(l => l.Source)

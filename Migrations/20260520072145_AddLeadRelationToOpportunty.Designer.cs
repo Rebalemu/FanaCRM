@@ -4,6 +4,7 @@ using FanaCRM.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FanaCRM.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260520072145_AddLeadRelationToOpportunty")]
+    partial class AddLeadRelationToOpportunty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,9 +297,6 @@ namespace FanaCRM.Migrations
                     b.Property<DateTime?>("LastContactedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("OpportunityId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
@@ -309,10 +309,6 @@ namespace FanaCRM.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedTo");
-
-                    b.HasIndex("OpportunityId")
-                        .IsUnique()
-                        .HasFilter("[OpportunityId] IS NOT NULL");
 
                     b.HasIndex("SourceId");
 
@@ -445,6 +441,8 @@ namespace FanaCRM.Migrations
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("ContactId");
+
+                    b.HasIndex("LeadId");
 
                     b.HasIndex("StageId");
 
@@ -1054,11 +1052,6 @@ namespace FanaCRM.Migrations
                         .HasForeignKey("AssignedTo")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("FanaCRM.Models.Opportunity", "Opportunity")
-                        .WithOne("Lead")
-                        .HasForeignKey("FanaCRM.Models.Lead", "OpportunityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("FanaCRM.Models.LeadSource", "Source")
                         .WithMany("Leads")
                         .HasForeignKey("SourceId")
@@ -1070,8 +1063,6 @@ namespace FanaCRM.Migrations
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Opportunity");
 
                     b.Navigation("Source");
 
@@ -1098,6 +1089,10 @@ namespace FanaCRM.Migrations
                         .WithMany("Opportunities")
                         .HasForeignKey("ContactId");
 
+                    b.HasOne("FanaCRM.Models.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId");
+
                     b.HasOne("FanaCRM.Models.OpportunityStage", "Stage")
                         .WithMany()
                         .HasForeignKey("StageId")
@@ -1107,6 +1102,8 @@ namespace FanaCRM.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("Contact");
+
+                    b.Navigation("Lead");
 
                     b.Navigation("Stage");
 
@@ -1283,8 +1280,6 @@ namespace FanaCRM.Migrations
 
             modelBuilder.Entity("FanaCRM.Models.Opportunity", b =>
                 {
-                    b.Navigation("Lead");
-
                     b.Navigation("Products");
                 });
 

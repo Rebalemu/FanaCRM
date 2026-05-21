@@ -1,4 +1,5 @@
 using FanaCRM.Models;
+using FanaCRM.ViewModels;
 
 namespace FanaCRM.Services.Interfaces
 {
@@ -15,6 +16,6 @@ namespace FanaCRM.Services.Interfaces
 
         Task<List<TimelineEvent>> GetLeadTimelineAsync(int leadId);
 
-        Task<List<TimelineEvent>> GetOpportunityTimelineAsync(int opportunityId);
+        Task<List<TimelineEventVM>> GetOpportunityTimelineAsync(int opportunityId);
     }
 }

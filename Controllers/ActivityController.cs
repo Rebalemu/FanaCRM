@@ -137,7 +137,9 @@ namespace FanaCRM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Complete(int id)
         {
-            await _service.CompleteAsync(id);
+            var userId = _userManager.GetUserId(User);
+
+            await _service.CompleteAsync(id, userId);
 
             return RedirectToAction(nameof(Index));
         }
@@ -150,13 +152,19 @@ namespace FanaCRM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id)
         {
-            await _service.CancelAsync(id);
+            var userId = _userManager.GetUserId(User);
+            await _service.CancelAsync(id, userId);
 
             return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult> Dashboard()
         {
             var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Content("User ID is NULL");
+            }
 
             var vm = await _service.GetDashboardAsync(userId);
 

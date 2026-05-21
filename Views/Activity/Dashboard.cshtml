@@ -7,102 +7,427 @@
 
 <div class="container-fluid mt-4">
 
+    <!-- PAGE HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
-            <h3 class="fw-bold">
-                <i class="bi bi-speedometer2"></i>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-speedometer2 text-primary"></i>
                 Activity Dashboard
-            </h3>
+            </h2>
 
-            <small class="text-muted">
-                Overview of your activities and follow-ups
-            </small>
+            <p class="text-muted mb-0">
+                Overview of activities, follow-ups and pending tasks.
+            </p>
         </div>
 
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i>
-            New Activity
-        </a>
+        <div class="d-flex gap-2">
+
+            <a asp-controller="Activity" asp-action="Index" class="btn btn-outline-dark">
+
+                <i class="bi bi-list-ul"></i>
+                All Activities
+            </a>
+
+            <a asp-controller="Activity" asp-action="Create" class="btn btn-primary">
+
+                <i class="bi bi-plus-circle"></i>
+                New Activity
+            </a>
+
+        </div>
 
     </div>
 
     <!-- STATS -->
-    <div class="row mb-4">
+    <div class="row g-4 mb-4">
 
-        <div class="col-md-3">
-            <div class="card shadow border-0">
+        <!-- TOTAL -->
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
                 <div class="card-body">
-                    <h6 class="text-muted">Total Activities</h6>
-                    <h2>@Model.TotalActivities</h2>
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <small class="text-muted d-block">
+                                Total Activities
+                            </small>
+
+                            <h2 class="fw-bold mb-0 mt-2">
+                                @Model.TotalActivities
+                            </h2>
+
+                        </div>
+
+                        <div class="fs-1 text-primary">
+                            <i class="bi bi-clipboard-data"></i>
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow border-0">
+        <!-- PENDING -->
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
                 <div class="card-body">
-                    <h6 class="text-muted">Pending</h6>
-                    <h2>@Model.PendingActivities</h2>
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <small class="text-muted d-block">
+                                Pending Activities
+                            </small>
+
+                            <h2 class="fw-bold text-warning mb-0 mt-2">
+                                @Model.PendingActivities
+                            </h2>
+
+                        </div>
+
+                        <div class="fs-1 text-warning">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow border-0">
+        <!-- COMPLETED -->
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
                 <div class="card-body">
-                    <h6 class="text-muted">Completed Today</h6>
-                    <h2>@Model.CompletedToday</h2>
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <small class="text-muted d-block">
+                                Completed Today
+                            </small>
+
+                            <h2 class="fw-bold text-success mb-0 mt-2">
+                                @Model.CompletedToday
+                            </h2>
+
+                        </div>
+
+                        <div class="fs-1 text-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow border-0">
+        <!-- OVERDUE -->
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
                 <div class="card-body">
-                    <h6 class="text-muted">Overdue</h6>
-                    <h2 class="text-danger">
-                        @Model.OverdueActivities
-                    </h2>
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <small class="text-muted d-block">
+                                Overdue Activities
+                            </small>
+
+                            <h2 class="fw-bold text-danger mb-0 mt-2">
+                                @Model.OverdueActivities
+                            </h2>
+
+                        </div>
+
+                        <div class="fs-1 text-danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
     </div>
 
-    <!-- OVERDUE -->
-    <div class="card shadow border-0 mb-4">
+    <!-- TABLES -->
+    <div class="row g-4">
 
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0">
-                Overdue Activities
-            </h5>
+        <!-- OVERDUE -->
+        <div class="col-lg-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-circle"></i>
+                        Overdue Activities
+                    </h5>
+
+                    <span class="badge bg-light text-dark">
+                        @Model.OverdueList.Count
+                    </span>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    @if (Model.OverdueList != null && Model.OverdueList.Any())
+                    {
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle mb-0">
+
+                                <thead class="table-light">
+
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Type</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var item in Model.OverdueList)
+                                    {
+                                        <tr>
+
+                                            <td class="fw-semibold">
+
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
+
+                                                    @item.Subject
+
+                                                </a>
+
+                                            </td>
+
+                                            <td>
+                                                @item.TypeName
+                                            </td>
+
+                                            <td class="text-danger fw-semibold">
+                                                @(item.DueDate?.ToString("MMM dd, yyyy") ?? "-")
+                                            </td>
+
+                                            <td>
+
+                                                <span class="badge bg-danger">
+                                                    @item.Status
+                                                </span>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+
+                            <i class="bi bi-check-circle fs-1"></i>
+
+                            <div class="mt-2">
+                                No overdue activities.
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="card-body">
+        <!-- UPCOMING -->
+        <div class="col-lg-6">
 
-            @if (Model.OverdueList.Any())
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event"></i>
+                        Upcoming Activities
+                    </h5>
+
+                    <span class="badge bg-light text-dark">
+                        @Model.UpcomingActivities.Count
+                    </span>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    @if (Model.UpcomingActivities != null && Model.UpcomingActivities.Any())
+                    {
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle mb-0">
+
+                                <thead class="table-light">
+
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Type</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var item in Model.UpcomingActivities)
+                                    {
+                                        <tr>
+
+                                            <td class="fw-semibold">
+
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
+
+                                                    @item.Subject
+
+                                                </a>
+
+                                            </td>
+
+                                            <td>
+                                                @item.TypeName
+                                            </td>
+
+                                            <td>
+                                                @(item.DueDate?.ToString("MMM dd, yyyy") ?? "-")
+                                            </td>
+
+                                            <td>
+
+                                                @if (item.IsCompleted)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        Completed
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-primary">
+                                                        @item.Status
+                                                    </span>
+                                                }
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+
+                            <i class="bi bi-calendar-check fs-1"></i>
+
+                            <div class="mt-2">
+                                No upcoming activities.
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RECENT -->
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">
+                <i class="bi bi-clock-history"></i>
+                Recent Activities
+            </h5>
+
+            <span class="badge bg-light text-dark">
+                @Model.MyActivities.Count
+            </span>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (Model.MyActivities != null && Model.MyActivities.Any())
             {
                 <div class="table-responsive">
 
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle mb-0">
 
-                        <thead>
+                        <thead class="table-light">
+
                             <tr>
                                 <th>Subject</th>
                                 <th>Type</th>
+                                <th>Assigned To</th>
                                 <th>Due Date</th>
                                 <th>Status</th>
+                                <th width="120"></th>
                             </tr>
+
                         </thead>
 
                         <tbody>
 
-                            @foreach (var item in Model.OverdueList)
+                            @foreach (var item in Model.MyActivities)
                             {
                                 <tr>
 
-                                    <td>
+                                    <td class="fw-semibold">
                                         @item.Subject
                                     </td>
 
@@ -110,12 +435,50 @@
                                         @item.TypeName
                                     </td>
 
-                                    <td class="text-danger">
-                                        @item.DueDate?.ToString("yyyy-MM-dd")
+                                    <td>
+                                        @item.AssignedTo
                                     </td>
 
                                     <td>
-                                        @item.Status
+                                        @(item.DueDate?.ToString("MMM dd, yyyy") ?? "-")
+                                    </td>
+
+                                    <td>
+
+                                        @if (item.IsCompleted)
+                                        {
+                                            <span class="badge bg-success">
+                                                Completed
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                @item.Status
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td>
+
+                                        <div class="d-flex gap-1">
+
+                                            <a asp-action="Details" asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-outline-primary">
+
+                                                <i class="bi bi-eye"></i>
+
+                                            </a>
+
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-dark">
+
+                                                <i class="bi bi-pencil"></i>
+
+                                            </a>
+
+                                        </div>
+
                                     </td>
 
                                 </tr>
@@ -129,76 +492,14 @@
             }
             else
             {
-                <div class="text-muted">
-                    No overdue activities.
-                </div>
-            }
+                <div class="p-4 text-center text-muted">
 
-        </div>
+                    <i class="bi bi-inbox fs-1"></i>
 
-    </div>
+                    <div class="mt-2">
+                        No activities found.
+                    </div>
 
-    <!-- UPCOMING -->
-    <div class="card shadow border-0">
-
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                Upcoming Activities
-            </h5>
-        </div>
-
-        <div class="card-body">
-
-            @if (Model.UpcomingActivities.Any())
-            {
-                <div class="table-responsive">
-
-                    <table class="table table-hover">
-
-                        <thead>
-                            <tr>
-                                <th>Subject</th>
-                                <th>Type</th>
-                                <th>Due Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @foreach (var item in Model.UpcomingActivities)
-                            {
-                                <tr>
-
-                                    <td>
-                                        @item.Subject
-                                    </td>
-
-                                    <td>
-                                        @item.TypeName
-                                    </td>
-
-                                    <td>
-                                        @item.DueDate?.ToString("yyyy-MM-dd")
-                                    </td>
-
-                                    <td>
-                                        @item.Status
-                                    </td>
-
-                                </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-            }
-            else
-            {
-                <div class="text-muted">
-                    No upcoming activities.
                 </div>
             }
 

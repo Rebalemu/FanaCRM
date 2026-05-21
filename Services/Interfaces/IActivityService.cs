@@ -16,9 +16,9 @@ namespace FanaCRM.Services.Interfaces
 
         Task UpdateAsync(ActivityFormVM vm, string userId);
 
-        Task CompleteAsync(int id);
+        Task CompleteAsync(int id, string userId);
 
-        Task CancelAsync(int id);
+        Task CancelAsync(int id, string userId);
         Task<ActivityDashboardVM> GetDashboardAsync(string userId);
     }
 }

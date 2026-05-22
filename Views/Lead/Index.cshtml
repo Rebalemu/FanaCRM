@@ -248,7 +248,7 @@
                                             @if (item.Status == "Qualified")
                                             {
                                                 <a asp-action="Convert" asp-route-id="@item.Id" class="btn btn-sm btn-success"
-                                                       onclick="return confirm('Convert this lead?');">
+                                                   onclick="return confirm('Convert this lead?');">
 
                                                     <i class="bi bi-arrow-repeat"></i> Convert
 
@@ -312,32 +312,17 @@
 
         $(document).ready(function () {
 
-            // SELECT2
-            $('.searchable-dropdown').select2({
-
-                theme: 'bootstrap-5',
-
-                width: '100%',
-
-                placeholder: 'Select',
-
-                allowClear: true
-
-            });
-
+            // =====================================
             // DATATABLE
+            // =====================================
+
             var table = $('#leadTable').DataTable({
 
                 responsive: true,
-
                 autoWidth: false,
-
                 orderCellsTop: true,
-
                 fixedHeader: true,
-
                 pageLength: 10,
-
                 order: [[7, 'desc']],
 
                 columnDefs: [
@@ -348,25 +333,26 @@
                 ],
 
                 language: {
-
                     search: "_INPUT_",
-
                     searchPlaceholder: "Global Search..."
-
                 },
 
                 initComplete: function () {
 
                     var api = this.api();
 
-                    // SOURCE
-                    createDropdownFilter(api, 4);
+                    // Create dropdowns
+                    createDropdownFilter(api, 4); // Source
+                    createDropdownFilter(api, 5); // Status
+                    createDropdownFilter(api, 6); // Assigned
 
-                    // STATUS
-                    createDropdownFilter(api, 5);
-
-                    // ASSIGNED
-                    createDropdownFilter(api, 6);
+                    // Initialize Select2 AFTER options loaded
+                    $('.searchable-dropdown').select2({
+                        theme: 'bootstrap-5',
+                        width: '100%',
+                        placeholder: 'Select',
+                        allowClear: true
+                    });
 
                 }
 
@@ -384,14 +370,10 @@
 
                     $(input).on('keyup change', function () {
 
-                        if (table.column(i).search() !== this.value) {
-
-                            table
-                                .column(i)
-                                .search(this.value)
-                                .draw();
-
-                        }
+                        table
+                            .column(i)
+                            .search(this.value)
+                            .draw();
 
                     });
 
@@ -411,29 +393,40 @@
                     .eq(columnIndex)
                     .find('select');
 
-                // UNIQUE VALUES
-                column.data().unique().sort().each(function (d) {
+                // Clear old options except first
+                select.find('option:not(:first)').remove();
 
+                // Get unique clean text values
+                var uniqueValues = [];
+
+                column.data().each(function (d) {
+
+                    // Convert HTML -> TEXT
                     var text = $('<div>').html(d).text().trim();
 
-                    if (text !== '') {
-
-                        select.append(
-                            `<option value="${text}">${text}</option>`
-                        );
-
+                    if (text !== '' && !uniqueValues.includes(text)) {
+                        uniqueValues.push(text);
                     }
 
                 });
 
-                // FILTER EVENT
+                uniqueValues.sort();
+
+                // Add dropdown options
+                uniqueValues.forEach(function (value) {
+
+                    select.append(
+                        `<option value="${value}">${value}</option>`
+                    );
+
+                });
+
+                // Filter table
                 select.on('change', function () {
 
-                    var value = $.fn.dataTable.util.escapeRegex($(this).val());
+                    var selected = $(this).val();
 
-                    column
-                        .search(value ? '^' + value + '$' : '', true, false)
-                        .draw();
+                    column.search(selected).draw();
 
                 });
 

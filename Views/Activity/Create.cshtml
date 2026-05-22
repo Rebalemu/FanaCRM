@@ -96,137 +96,189 @@
                         </label>
 
                         <textarea asp-for="Description" rows="4" class="form-control"
-                                      placeholder="Write activity notes...">
+                                  placeholder="Write activity notes...">
                         </textarea>
 
-                        </div>
+                    </div>
 
-                        <!-- COMPANY -->
-                        <div class="col-md-6 mb-3">
+                    <!-- COMPANY -->
+                    <div class="col-md-6 mb-3">
 
-                            <label asp-for="CompanyId" class="form-label fw-semibold">
-                            </label>
+                        <label asp-for="CompanyId" class="form-label fw-semibold">
+                        </label>
 
-                            <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select searchable-dropdown">
+                        <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select searchable-dropdown">
 
-                                <option value="">-- Select Company --</option>
+                            <option value="">-- Select Company --</option>
 
-                            </select>
-
-                        </div>
-
-                        <!-- CONTACT -->
-                        <div class="col-md-6 mb-3">
-
-                            <label asp-for="ContactId" class="form-label fw-semibold">
-                            </label>
-
-                            <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select searchable-dropdown">
-
-                                <option value="">-- Select Contact --</option>
-
-                            </select>
-
-                        </div>
-
-                        <!-- LEAD -->
-                        <div class="col-md-6 mb-3">
-
-                            <label asp-for="LeadId" class="form-label fw-semibold">
-                            </label>
-
-                            <select asp-for="LeadId" asp-items="Model.Leads" class="form-select searchable-dropdown">
-
-                                <option value="">-- Select Lead --</option>
-
-                            </select>
-
-                        </div>
-
-                        <!-- OPPORTUNITY -->
-                        <div class="col-md-6 mb-3">
-
-                            <label asp-for="OpportunityId" class="form-label fw-semibold">
-                            </label>
-
-                            <select asp-for="OpportunityId" asp-items="Model.Opportunities"
-                                    class="form-select searchable-dropdown">
-
-                                <option value="">-- Select Opportunity --</option>
-
-                            </select>
-
-                        </div>
-
-                        <!-- ASSIGNED TO -->
-                        <div class="col-md-6 mb-3">
-
-                            <label asp-for="AssignedToId" class="form-label fw-semibold">
-                            </label>
-
-                            <select asp-for="AssignedToId" asp-items="Model.Users" class="form-select searchable-dropdown">
-
-                                <option value="">-- Select User --</option>
-
-                            </select>
-
-                            <span asp-validation-for="AssignedToId" class="text-danger">
-                            </span>
-
-                        </div>
-
-                        <!-- DUE DATE -->
-                        <div class="col-md-6 mb-3">
-
-                            <label asp-for="DueDate" class="form-label fw-semibold">
-                            </label>
-
-                            <input asp-for="DueDate" type="datetime-local" class="form-control" />
-
-                        </div>
+                        </select>
 
                     </div>
 
-                    <hr />
+                    <!-- CONTACT -->
+                    <div class="col-md-6 mb-3">
 
-                    <div class="text-end">
+                        <label asp-for="ContactId" class="form-label fw-semibold">
+                        </label>
 
-                        <button type="submit" class="btn btn-primary px-4">
+                        <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select searchable-dropdown">
 
-                            <i class="bi bi-check-circle"></i>
-                            Save Activity
+                            <option value="">-- Select Contact --</option>
 
-                        </button>
+                        </select>
 
                     </div>
 
-                </form>
+                    <!-- LEAD -->
+                    <div class="col-md-6 mb-3">
 
-            </div>
+                        <label asp-for="LeadId" class="form-label fw-semibold">
+                        </label>
+
+                        <select asp-for="LeadId" asp-items="Model.Leads" class="form-select searchable-dropdown">
+
+                            <option value="">-- Select Lead --</option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- OPPORTUNITY -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="OpportunityId" class="form-label fw-semibold">
+                        </label>
+
+                        <select asp-for="OpportunityId" asp-items="Model.Opportunities"
+                                class="form-select searchable-dropdown">
+
+                            <option value="">-- Select Opportunity --</option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- ASSIGNED TO -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="AssignedToId" class="form-label fw-semibold">
+                        </label>
+
+                        <select asp-for="AssignedToId" asp-items="Model.Users" class="form-select searchable-dropdown">
+
+                            <option value="">-- Select User --</option>
+
+                        </select>
+
+                        <span asp-validation-for="AssignedToId" class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- DUE DATE -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="DueDate" class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="DueDate" type="datetime-local" class="form-control" />
+
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <div class="text-end">
+
+                    <button type="submit" class="btn btn-primary px-4">
+
+                        <i class="bi bi-check-circle"></i>
+                        Save Activity
+
+                    </button>
+
+                </div>
+
+            </form>
 
         </div>
 
     </div>
 
-    @section Scripts {
+</div>
 
-        <partial name="_ValidationScriptsPartial" />
+@section Scripts {
 
-        <script>
+    <partial name="_ValidationScriptsPartial" />
 
-            $(document).ready(function () {
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-                $('.searchable-dropdown').select2({
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+          rel="stylesheet" />
 
-                    theme: 'bootstrap-5',
-                    width: '100%',
-                    placeholder: 'Select option',
-                    allowClear: true
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-                });
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-            });
+    <script>
 
-        </script>
+        $(document).ready(function () {
 
-    }
+        $('#CompanyId').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- Select Company --',
+        allowClear: true
+        });
+
+        $('#ContactId').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- Select Contact --',
+        allowClear: true
+        });
+
+        $('#AssignedToId').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- Select User --',
+        allowClear: true
+        });
+
+        $('#LeadId').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- Select Lead --',
+        allowClear: true
+        });
+
+        $('#OpportunityId').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- Select Opportunity --',
+        allowClear: true
+        });
+
+        $('#TypeId').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- Select Type --',
+        allowClear: true
+        });
+
+        $('#StatusId').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '-- Select Status --',
+        allowClear: true
+        });
+
+        });
+
+    </script>
+
+}

@@ -8,21 +8,17 @@
 <div class="container-fluid mt-4">
 
     <!-- PAGE HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
 
         <div>
 
-            <h3 class="fw-bold mb-1">
-
+            <h3 class="fw-bold mb-0">
                 <i class="bi bi-activity"></i>
                 Activity Management
-
             </h3>
 
             <small class="text-muted">
-
                 Manage calls, meetings, tasks, and follow-ups
-
             </small>
 
         </div>
@@ -43,39 +39,76 @@
 
             <div class="table-responsive">
 
-                <table id="activityTable" class="table table-hover align-middle w-100">
+                <table id="activityTable" class="table table-hover table-striped align-middle w-100">
 
-                    <!-- HEAD -->
+                    <!-- TABLE HEADER -->
                     <thead class="table-dark">
 
+                        <!-- FILTER ROW -->
                         <tr>
 
-                            <th>Subject</th>
+                            <!-- SUBJECT -->
+                            <th>
+                                <input type="text" placeholder="Search Subject"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
 
-                            <th>Type</th>
+                            <!-- TYPE -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Types</option>
+                                </select>
+                            </th>
 
-                            <th>Company</th>
+                            <!-- COMPANY -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Companies</option>
+                                </select>
+                            </th>
 
-                            <th>Contact</th>
+                            <!-- CONTACT -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Contacts</option>
+                                </select>
+                            </th>
 
-                            <th>Assigned</th>
+                            <!-- ASSIGNED -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Users</option>
+                                </select>
+                            </th>
 
-                            <th>Due Date</th>
+                            <!-- DUE DATE -->
+                            <th>
+                                <input type="text" placeholder="Search Due Date"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
 
-                            <th>Status</th>
+                            <!-- STATUS -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Statuses</option>
+                                </select>
+                            </th>
 
-                            <th class="text-end">Actions</th>
+                            <!-- ACTION -->
+                            <th>
+                                Actions
+                            </th>
 
                         </tr>
 
                     </thead>
 
-                    <!-- BODY -->
+                    <!-- TABLE BODY -->
                     <tbody>
 
-                        @if (Model.Any())
+                        @if (Model != null && Model.Any())
                         {
-                            foreach (var item in Model)
+                            @foreach (var item in Model)
                             {
                                 <tr>
 
@@ -100,14 +133,18 @@
                                     <!-- COMPANY -->
                                     <td>
 
-                                        @(item.CompanyName ?? "N/A")
+                                        @(string.IsNullOrWhiteSpace(item.CompanyName)
+                                            ? "N/A"
+                                            : item.CompanyName)
 
                                     </td>
 
                                     <!-- CONTACT -->
                                     <td>
 
-                                        @(item.ContactName ?? "N/A")
+                                        @(string.IsNullOrWhiteSpace(item.ContactName)
+                                            ? "N/A"
+                                            : item.ContactName)
 
                                     </td>
 
@@ -123,8 +160,9 @@
 
                                         @(item.DueDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")
 
-                                        @if (item.DueDate < DateTime.Now
-                                                                               && !item.IsCompleted)
+                                        @if (item.DueDate.HasValue
+                                       && item.DueDate.Value < DateTime.Now
+                                       && !item.IsCompleted)
                                         {
                                             <span class="badge bg-danger ms-1">
 
@@ -180,6 +218,8 @@
                                             {
                                                 <form asp-action="Complete" asp-route-id="@item.Id" method="post" class="d-inline">
 
+                                                    @Html.AntiForgeryToken()
+
                                                     <button class="btn btn-sm btn-success">
 
                                                         <i class="bi bi-check-circle"></i>
@@ -191,6 +231,8 @@
 
                                             <!-- CANCEL -->
                                             <form asp-action="Cancel" asp-route-id="@item.Id" method="post" class="d-inline">
+
+                                                @Html.AntiForgeryToken()
 
                                                 <button class="btn btn-sm btn-danger">
 
@@ -211,7 +253,7 @@
                         {
                             <tr>
 
-                                <td colspan="8" class="text-center py-5 text-muted">
+                                <td colspan="8" class="text-center text-muted py-5">
 
                                     No activities found.
 
@@ -238,11 +280,35 @@
 
         $(document).ready(function () {
 
-            $('#activityTable').DataTable({
+            // =====================================
+            // SELECT2
+            // =====================================
+
+            $('.searchable-dropdown').select2({
+
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Select',
+                allowClear: true
+
+            });
+
+            // =====================================
+            // DATATABLE
+            // =====================================
+
+            var table = $('#activityTable').DataTable({
 
                 responsive: true,
+
                 autoWidth: false,
+
+                orderCellsTop: true,
+
+                fixedHeader: true,
+
                 pageLength: 10,
+
                 order: [[5, 'desc']],
 
                 columnDefs: [
@@ -250,9 +316,116 @@
                         orderable: false,
                         targets: 7
                     }
-                ]
+                ],
+
+                language: {
+
+                    search: "_INPUT_",
+
+                    searchPlaceholder: "Global Search..."
+
+                },
+
+                initComplete: function () {
+
+                    var api = this.api();
+
+                    // TYPE
+                    createDropdownFilter(api, 1);
+
+                    // COMPANY
+                    createDropdownFilter(api, 2);
+
+                    // CONTACT
+                    createDropdownFilter(api, 3);
+
+                    // ASSIGNED
+                    createDropdownFilter(api, 4);
+
+                    // STATUS
+                    createDropdownFilter(api, 6);
+
+                }
 
             });
+
+            // =====================================
+            // TEXT FILTERS
+            // =====================================
+
+            $('#activityTable thead tr:eq(0) th').each(function (i) {
+
+                var input = $(this).find('input');
+
+                if (input.length > 0) {
+
+                    $(input).on('keyup change', function () {
+
+                        if (table.column(i).search() !== this.value) {
+
+                            table
+                                .column(i)
+                                .search(this.value)
+                                .draw();
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+            // =====================================
+            // DROPDOWN FILTERS
+            // =====================================
+
+            function createDropdownFilter(api, columnIndex) {
+
+                var column = api.column(columnIndex);
+
+                var select = $('#activityTable thead tr:eq(0) th')
+                    .eq(columnIndex)
+                    .find('select');
+
+                var uniqueValues = [];
+
+                column.data().each(function (d) {
+
+                    var text = $('<div>').html(d).text().trim();
+
+                    if (text !== '' &&
+                        text !== 'N/A' &&
+                        !uniqueValues.includes(text)) {
+
+                        uniqueValues.push(text);
+
+                    }
+
+                });
+
+                uniqueValues.sort();
+
+                uniqueValues.forEach(function (d) {
+
+                    select.append(
+                        `<option value="${d}">${d}</option>`
+                    );
+
+                });
+
+                // FILTER EVENT
+                select.on('change', function () {
+
+                    var value = $(this).val();
+
+                    column
+                        .search(value ? '^' + value + '$' : '', true, false)
+                        .draw();
+
+                });
+
+            }
 
         });
 

@@ -11,15 +11,12 @@
 <div class="row g-3">
     <div class="col-md-6">
         <label asp-for="CompanyId"></label>
-        <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select">
-            <option value="">-- Select Company --</option>
-        </select>
+        <select asp-for="CompanyId" asp-items="Model.Companies" class="form-select searchable-select"></select>
     </div>
 
     <div class="col-md-6">
         <label asp-for="ContactId"></label>
-        <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select">
-            <option value="">-- Select Contact --</option>
+        <select asp-for="ContactId" asp-items="Model.Contacts" class="form-select searchable-select">
         </select>
     </div>
 
@@ -30,10 +27,11 @@
 
     <div class="col-md-4">
         <label asp-for="StageId"></label>
-        <select asp-for="StageId" asp-items="Model.Stages" class="form-select"></select>
+        <select asp-for="StageId" asp-items="Model.Stages" class="form-select searchable-select">
+        </select>
     </div>
-    <div class="col-12 mt-3" id="lossReasonContainer"">
-        <label asp-for=" LossReason"></label>
+    <div class="col-12 mt-3" id="lossReasonContainer">
+        <label asp-for="LossReason"></label>
         <textarea asp-for="LossReason" class="form-control"></textarea>
         <span asp-validation-for="LossReason" class="text-danger"></span>
     </div>
@@ -45,7 +43,8 @@
 
     <div class="col-md-4">
         <label asp-for="AssignedTo"></label>
-        <select asp-for="AssignedTo" asp-items="Model.Users" class="form-select"></select>
+        <select asp-for="AssignedTo" asp-items="Model.Users" class="form-select searchable-select">
+        </select>
     </div>
 </div>
 

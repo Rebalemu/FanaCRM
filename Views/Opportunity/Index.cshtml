@@ -263,32 +263,17 @@
 
         $(document).ready(function () {
 
-            // SELECT2
-            $('.searchable-dropdown').select2({
-
-                theme: 'bootstrap-5',
-
-                width: '100%',
-
-                placeholder: 'Select',
-
-                allowClear: true
-
-            });
-
+            // =========================================
             // DATATABLE
+            // =========================================
+
             var table = $('#opportunityTable').DataTable({
 
                 responsive: true,
-
                 autoWidth: false,
-
                 orderCellsTop: true,
-
                 fixedHeader: true,
-
                 pageLength: 10,
-
                 order: [[4, 'asc']],
 
                 columnDefs: [
@@ -299,38 +284,41 @@
                 ],
 
                 language: {
-
                     search: "_INPUT_",
-
                     searchPlaceholder: "Global Search..."
-
                 },
 
                 initComplete: function () {
 
                     var api = this.api();
 
-                    // STAGE FILTER
-                    createDropdownFilter(api, 2);
+                    // CREATE FILTERS
+                    createDropdownFilter(api, 2); // Stage
+                    createDropdownFilter(api, 5); // Assigned To
 
-                    // ASSIGNED FILTER
-                    createDropdownFilter(api, 5);
+                    // INIT SELECT2 AFTER OPTIONS LOADED
+                    $('.searchable-dropdown').select2({
+                        theme: 'bootstrap-5',
+                        width: '100%',
+                        placeholder: 'Select',
+                        allowClear: true
+                    });
 
                 }
 
             });
 
-            // =====================================
-            // TEXT FILTERS
-            // =====================================
+            // =========================================
+            // TEXT SEARCH
+            // =========================================
 
             $('#opportunityTable thead tr:eq(0) th').each(function (i) {
 
                 var input = $(this).find('input');
 
-                if (input.length > 0) {
+                if (input.length) {
 
-                    $(input).on('keyup change', function () {
+                    input.on('keyup change', function () {
 
                         if (table.column(i).search() !== this.value) {
 
@@ -347,9 +335,9 @@
 
             });
 
-            // =====================================
-            // DROPDOWN FILTERS
-            // =====================================
+            // =========================================
+            // DROPDOWN FILTER
+            // =========================================
 
             function createDropdownFilter(api, columnIndex) {
 
@@ -359,28 +347,43 @@
                     .eq(columnIndex)
                     .find('select');
 
-                // UNIQUE VALUES
-                column.data().unique().sort().each(function (d) {
+                // CLEAR OLD OPTIONS EXCEPT FIRST
+                select.find('option:not(:first)').remove();
 
-                    var text = $('<div>').html(d).text().trim();
+                // GET UNIQUE CLEAN VALUES
+                var uniqueValues = [];
 
-                    if (text !== '') {
+                column.nodes().each(function (cell) {
 
-                        select.append(
-                            `<option value="${text}">${text}</option>`
-                        );
+                    var text = $(cell).text().trim();
+
+                    if (text && !uniqueValues.includes(text)) {
+
+                        uniqueValues.push(text);
 
                     }
 
                 });
 
-                // FILTER EVENT
+                uniqueValues.sort();
+
+                // APPEND OPTIONS
+                uniqueValues.forEach(function (value) {
+
+                    select.append(
+                        `<option value="${value}">${value}</option>`
+                    );
+
+                });
+
+                // FILTER
                 select.on('change', function () {
 
-                    var value = $.fn.dataTable.util.escapeRegex($(this).val());
+                    var value = $.fn.dataTable.util
+                        .escapeRegex($(this).val());
 
                     column
-                        .search(value ? '^' + value + '$' : '', true, false)
+                        .search(value ? value : '', true, false)
                         .draw();
 
                 });

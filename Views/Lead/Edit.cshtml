@@ -1,0 +1,61 @@
+@model FanaCRM.ViewModels.LeadEditVM
+
+@{
+    ViewData["Title"] = "Edit Lead";
+}
+
+<div class="container mt-4">
+    <h3>Edit Lead</h3>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="FullName"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="Phone"></label>
+                <input asp-for="Phone" class="form-control" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="Company"></label>
+                <input asp-for="Company" class="form-control" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>Source</label>
+                <select asp-for="SourceId" asp-items="Model.Sources" class="form-control"></select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>Status</label>
+                <select asp-for="StatusId" asp-items="Model.Statuses" class="form-control"></select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>Assign To</label>
+                <select asp-for="AssignedTo" asp-items="Model.Users" class="form-control">
+                    <option value="">-- Unassigned --</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Update</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

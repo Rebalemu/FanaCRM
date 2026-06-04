@@ -1,0 +1,274 @@
+@model FanaCRM.ViewModels.OpportunityFormVM
+
+<script>
+
+    // =========================================
+    // PRODUCT OPTIONS
+    // =========================================
+
+    let productOptions = `@Html.Raw(string.Join("", Model.ProductsData.Select(p =>
+                $"<option value='{p.Id}' data-price='{p.Price}'>{p.Name}</option>"
+        )))`;
+
+    // =========================================
+    // INIT SELECT2
+    // =========================================
+
+    function initializeSearchableDropdowns() {
+
+        $('.searchable-select').select2({
+
+            theme: 'bootstrap-5',
+
+            width: '100%',
+
+            placeholder: '-- Select --',
+
+            allowClear: true
+
+        });
+
+    }
+
+    // =========================================
+    // ADD PRODUCT ROW
+    // =========================================
+
+    function addRow() {
+
+        let index = $('#productsTable tbody tr').length;
+
+        let row = `
+        <tr>
+
+            <td>
+
+                <select name="Products[${index}].ProductId"
+                        class="form-select product-select searchable-select">
+
+                    <option value="">-- Select Product --</option>
+
+                    ${productOptions}
+
+                </select>
+
+            </td>
+
+            <td>
+
+                <input name="Products[${index}].Quantity"
+                       class="form-control qty"
+                       value="1" />
+
+            </td>
+
+            <td>
+
+                <input name="Products[${index}].Price"
+                       class="form-control price"
+                       value="0" />
+
+            </td>
+
+            <td class="row-total">
+
+                0.00
+
+            </td>
+
+            <td>
+
+                <button type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="removeRow(this)">
+
+                    X
+
+                </button>
+
+            </td>
+
+        </tr>`;
+
+        $('#productsTable tbody').append(row);
+
+        // INIT SELECT2 FOR NEW ROW
+        initializeSearchableDropdowns();
+    }
+
+    // =========================================
+    // REMOVE ROW
+    // =========================================
+
+    function removeRow(btn) {
+
+        $(btn).closest('tr').remove();
+
+        reIndexRows();
+
+        calculateTotal();
+    }
+
+    // =========================================
+    // REINDEX ROWS
+    // =========================================
+
+    function reIndexRows() {
+
+        $('#productsTable tbody tr').each(function (index) {
+
+            $(this).find('select, input').each(function () {
+
+                let name = $(this).attr('name');
+
+                if (name) {
+
+                    name = name.replace(
+                        /Products\[\d+\]/,
+                        `Products[${index}]`
+                    );
+
+                    $(this).attr('name', name);
+                }
+
+            });
+
+        });
+
+    }
+
+    // =========================================
+    // PRODUCT CHANGE -> AUTO PRICE
+    // =========================================
+
+    $(document).on('change', '.product-select', function () {
+
+        let row = $(this).closest('tr');
+
+        let price = $(this).find(':selected').data('price') || 0;
+
+        row.find('.price')
+            .val(price)
+            .trigger('input');
+
+    });
+
+    // =========================================
+    // CALCULATE ROW TOTAL
+    // =========================================
+
+    $(document).on('input', '.qty, .price', function () {
+
+        let row = $(this).closest('tr');
+
+        let qty = parseFloat(row.find('.qty').val()) || 0;
+
+        let price = parseFloat(row.find('.price').val()) || 0;
+
+        let total = qty * price;
+
+        row.find('.row-total')
+            .text(total.toFixed(2));
+
+        calculateTotal();
+
+    });
+
+    // =========================================
+    // GRAND TOTAL
+    // =========================================
+
+    function calculateTotal() {
+
+        let total = 0;
+
+        $('.row-total').each(function () {
+
+            total += parseFloat($(this).text()) || 0;
+
+        });
+
+        $('#totalAmount')
+            .text(total.toFixed(2));
+
+    }
+
+    // =========================================
+    // LOSS REASON TOGGLE
+    // =========================================
+
+    function toggleLossReason() {
+
+        let stageId = parseInt($("#StageId").val());
+
+        let lostStages = $("#lostStages")
+            .val()
+            .split(',')
+            .map(Number);
+
+        if (lostStages.includes(stageId)) {
+
+            $("#lossReasonContainer")
+                .removeClass("d-none");
+
+            $("#LossReason")
+                .prop("disabled", false);
+
+        }
+        else {
+
+            $("#lossReasonContainer")
+                .addClass("d-none");
+
+            $("#LossReason")
+                .val('');
+
+            $("#LossReason")
+                .prop("disabled", true);
+
+            $("span[data-valmsg-for='LossReason']")
+                .text('');
+        }
+    }
+
+    // =========================================
+    // PAGE LOAD
+    // =========================================
+
+    $(document).ready(function () {
+
+        initializeSearchableDropdowns();
+
+        calculateTotal();
+
+        toggleLossReason();
+
+        // STAGE CHANGE
+        $(document).on('change', '#StageId', function () {
+
+            toggleLossReason();
+
+        });
+
+        // DELETE MODAL
+        var deleteModal = document.getElementById('deleteModal');
+
+        if (deleteModal) {
+
+            deleteModal.addEventListener(
+                'show.bs.modal',
+                function (event) {
+
+                    var button = event.relatedTarget;
+
+                    var id = button.getAttribute('data-id');
+
+                    document.getElementById('deleteId').value = id;
+                }
+            );
+
+        }
+
+    });
+
+</script>

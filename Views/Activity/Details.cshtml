@@ -1,0 +1,203 @@
+@model FanaCRM.ViewModels.ActivityDetailsVM
+
+@{
+    ViewData["Title"] = "Activity Details";
+
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-info text-white">
+
+            <h4 class="mb-0">
+
+                <i class="bi bi-info-circle"></i>
+                Activity Details
+
+            </h4>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Subject</label>
+
+                    <div>@Model.Subject</div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Type</label>
+
+                    <div>
+
+                        <span class="badge bg-secondary">
+                            @Model.TypeName
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="col-12 mb-3">
+
+                    <label class="fw-bold">Description</label>
+
+                    <div class="border rounded p-3 bg-light">
+
+                        @(string.IsNullOrWhiteSpace(Model.Description)
+                            ? "No description."
+                            : Model.Description)
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Company</label>
+
+                    <div>@(Model.CompanyName ?? "N/A")</div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Contact</label>
+
+                    <div>@(Model.ContactName ?? "N/A")</div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Lead</label>
+
+                    <div>@(Model.LeadName ?? "N/A")</div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Opportunity</label>
+
+                    <div>@(Model.OpportunityName ?? "N/A")</div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Assigned To</label>
+
+                    <div>@Model.AssignedTo</div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Due Date</label>
+
+                    <div>
+
+                        @(Model.DueDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Status</label>
+
+                    <div>
+
+                        @{
+                            var badgeClass = Model.Status switch
+                            {
+                                "Open" => "bg-primary",
+                                "Completed" => "bg-success",
+                                "Cancelled" => "bg-danger",
+                                _ => "bg-secondary"
+                            };
+                        }
+
+                        <span class="badge @badgeClass">
+
+                            @Model.Status
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-bold">Created Date</label>
+
+                    <div>
+
+                        @Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <hr />
+
+            <div class="d-flex justify-content-between">
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+
+                </a>
+
+                <div>
+
+                    @if (!Model.IsCompleted)
+                    {
+                        <form asp-action="Complete"
+                              asp-route-id="@Model.Id"
+                              method="post"
+                              class="d-inline">
+
+                            <button class="btn btn-success">
+
+                                <i class="bi bi-check-circle"></i>
+                                Complete
+
+                            </button>
+
+                        </form>
+                    }
+
+                    <a asp-action="Edit"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-warning">
+
+                        <i class="bi bi-pencil-square"></i>
+                        Edit
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

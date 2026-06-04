@@ -1,0 +1,52 @@
+@model FanaCRM.ViewModels.Reports.ActivityReportVM
+
+@{
+    ViewData["Title"] = "Activity Report";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<div class="container-fluid">
+
+    <h2>Activity Report</h2>
+
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6>Total Activities</h6>
+                    <h3>@Model.TotalActivities</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6>Completed</h6>
+                    <h3>@Model.CompletedActivities</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6>Pending</h6>
+                    <h3>@Model.PendingActivities</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6>Overdue</h6>
+                    <h3>@Model.OverdueActivities</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

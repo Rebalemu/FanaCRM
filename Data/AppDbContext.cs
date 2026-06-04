@@ -1,0 +1,186 @@
+
+using FanaCRM.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace FanaCRM.Data
+{
+    public class AppDbContext : IdentityDbContext<Users>
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
+        {
+        }
+        public DbSet<Lead> Leads { get; set; }
+        public DbSet<LeadSource> LeadSources { get; set; }
+        public DbSet<LeadStatus> LeadStatuses { get; set; }
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
+        public DbSet<Opportunity> Opportunities { get; set; }
+        public DbSet<OpportunityProduct> OpportunityProducts { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<OpportunityStage> OpportunityStages { get; set; }
+        public DbSet<Activity> Activities { get; set; }
+        public DbSet<ActivityType> ActivityTypes { get; set; }
+        public DbSet<ActivityStatus> ActivityStatuses { get; set; }
+        public DbSet<OpportunityStageHistory> OpportunityStageHistories { get; set; }
+        public DbSet<TimelineEvent> TimelineEvents { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // User - Lead/Opportunity/Activity relationships with Restrict delete behavior
+
+            modelBuilder.Entity<Lead>()
+                .HasOne(l => l.User)
+                .WithMany(u => u.Leads)
+                .HasForeignKey(l => l.AssignedTo)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Lead>()
+    .HasOne(l => l.Opportunity)
+    .WithOne(o => o.Lead)
+    .HasForeignKey<Lead>(l => l.OpportunityId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Opportunity>()
+                .HasOne(o => o.User)
+                .WithMany(u => u.Opportunities)
+                .HasForeignKey(o => o.AssignedTo)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // modelBuilder.Entity<Activity>()
+            //     .HasOne(a => a.User)
+            //     .WithMany(u => u.Activities)
+            //     .HasForeignKey(a => a.AssignedTo)
+            //     .OnDelete(DeleteBehavior.Restrict);
+
+            // Lead - LeadSource and LeadStatus relationships
+            modelBuilder.Entity<Lead>()
+                .HasOne(l => l.Source)
+                .WithMany(s => s.Leads)
+                .HasForeignKey(l => l.SourceId);
+
+            modelBuilder.Entity<Lead>()
+                .HasOne(l => l.Status)
+                .WithMany(s => s.Leads)
+                .HasForeignKey(l => l.StatusId);
+            // Company - Contact relationship    
+            modelBuilder.Entity<Opportunity>()
+                .HasOne(o => o.Company)
+                .WithMany(c => c.Opportunities)
+                .HasForeignKey(o => o.CompanyId);
+
+
+            modelBuilder.Entity<Contact>()
+               .HasOne(c => c.Company)
+               .WithMany(a => a.Contacts)
+               .HasForeignKey(c => c.CompanyId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Opportunity>()
+                .HasOne(o => o.Stage)
+                .WithMany()
+                .HasForeignKey(o => o.StageId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //🔹 OpportunityProduct (CRITICAL)
+            modelBuilder.Entity<OpportunityProduct>()
+                .HasOne(op => op.Opportunity)
+                .WithMany(o => o.Products)
+                .HasForeignKey(op => op.OpportunityId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OpportunityProduct>()
+                .HasOne(op => op.Product)
+                .WithMany(p => p.OpportunityProducts)
+                .HasForeignKey(op => op.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // 🔹 Activity Relationships
+            // modelBuilder.Entity<Activity>()
+            //     .HasOne(a => a.Type)
+            //     .WithMany(t => t.Activities)
+            //     .HasForeignKey(a => a.TypeId);
+
+            modelBuilder.Entity<Activity>()
+                .HasOne(a => a.Company)
+                .WithMany(c => c.Activities)
+                .HasForeignKey(a => a.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Activity>()
+                .HasOne(a => a.Contact)
+                .WithMany(c => c.Activities)
+                .HasForeignKey(a => a.ContactId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            modelBuilder.Entity<OpportunityStage>().HasData(
+                new OpportunityStage { Id = 1, Name = "Prospect", Probability = 10 },
+                new OpportunityStage { Id = 2, Name = "Qualified", Probability = 30 },
+                new OpportunityStage { Id = 3, Name = "Proposal", Probability = 60 },
+                new OpportunityStage { Id = 4, Name = "Negotiation", Probability = 80 },
+                new OpportunityStage { Id = 5, Name = "Won", Probability = 100 },
+                new OpportunityStage { Id = 6, Name = "Lost", Probability = 0 }
+              );
+            modelBuilder.Entity<Product>().HasData(
+                new Product { Id = 1, Name = "Laptop - Dell XPS 13", Price = 1200.00m, Description = "13-inch ultrabook, 16GB RAM, 512GB SSD", IsActive = true },
+                new Product { Id = 2, Name = "Desktop PC - Custom Build", Price = 950.00m, Description = "Ryzen 5, 16GB RAM, 1TB SSD, GTX 1660", IsActive = true },
+                new Product { Id = 3, Name = "Wireless Mouse - Logitech", Price = 25.50m, Description = "Ergonomic wireless mouse", IsActive = true },
+                new Product { Id = 4, Name = "Mechanical Keyboard", Price = 75.00m, Description = "RGB backlit mechanical keyboard", IsActive = true },
+                new Product { Id = 5, Name = "27-inch Monitor - 4K", Price = 300.00m, Description = "Ultra HD IPS display", IsActive = true },
+                new Product { Id = 6, Name = "External SSD 1TB", Price = 150.00m, Description = "Portable high-speed storage", IsActive = true },
+                new Product { Id = 7, Name = "USB-C Hub", Price = 40.00m, Description = "Multiport adapter with HDMI, USB 3.0", IsActive = true },
+                new Product { Id = 8, Name = "Gaming Headset", Price = 60.00m, Description = "Surround sound headset with mic", IsActive = true },
+                new Product { Id = 9, Name = "Webcam HD 1080p", Price = 45.00m, Description = "Full HD webcam for streaming and meetings", IsActive = true },
+                new Product { Id = 10, Name = "Office Software License", Price = 120.00m, Description = "1-year subscription license", IsActive = true }
+             );
+            modelBuilder.Entity<Product>()
+                    .HasQueryFilter(p => !p.IsDeleted);
+            modelBuilder.Entity<OpportunityProduct>()
+                    .HasQueryFilter(op => !op.Product.IsDeleted);
+            modelBuilder.Entity<ActivityType>().HasData(
+                    new ActivityType { Id = 1, Name = "Call" },
+                    new ActivityType { Id = 2, Name = "Meeting" },
+                    new ActivityType { Id = 3, Name = "Email" },
+                    new ActivityType { Id = 4, Name = "Task" }
+                );
+            modelBuilder.Entity<OpportunityStageHistory>();
+            modelBuilder.Entity<LeadSource>().HasData(
+            new LeadSource { Id = 1, Name = "Website" },
+            new LeadSource { Id = 2, Name = "Referral" },
+            new LeadSource { Id = 3, Name = "Advertisement" }
+        );
+
+            // Seed LeadStatuses
+            modelBuilder.Entity<LeadStatus>().HasData(
+                new LeadStatus { Id = 1, Name = "New" },
+                new LeadStatus { Id = 2, Name = "Contacted" },
+                new LeadStatus { Id = 3, Name = "Qualified" },
+                new LeadStatus { Id = 4, Name = "Lost" }
+            );
+            modelBuilder.Entity<ActivityStatus>().HasData(
+                new ActivityStatus { Id = 1, Name = "Pending" },
+                new ActivityStatus { Id = 2, Name = "In Progress" },
+                new ActivityStatus { Id = 3, Name = "Completed" },
+                new ActivityStatus { Id = 4, Name = "Cancelled" },
+                new ActivityStatus { Id = 5, Name = "Overdue" }
+            );
+
+            modelBuilder.Entity<TimelineEvent>()
+                    .HasOne(t => t.Activity)
+                    .WithMany()
+                    .HasForeignKey(t => t.ActivityId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TimelineEvent>()
+                    .HasOne(t => t.User)
+                    .WithMany()
+                    .HasForeignKey(t => t.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+        }
+    }
+}
+

@@ -1,0 +1,56 @@
+@model List<FanaCRM.Models.TimelineEvent>
+
+<div class="card shadow-sm border-0">
+
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            Timeline
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        @if (Model.Any())
+        {
+            <div class="timeline">
+
+                @foreach (var item in Model)
+                {
+                    <div class="border-start border-3 ps-3 mb-4">
+
+                        <div class="fw-bold">
+                            @item.Title
+                        </div>
+
+                        <div class="text-muted small mb-1">
+
+                            @item.CreatedDate.ToString("yyyy-MM-dd HH:mm")
+
+                            •
+
+                            @item.User.FullName
+
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(item.Description))
+                        {
+                            <div>
+                                @item.Description
+                            </div>
+                        }
+
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="text-muted">
+                No timeline events found.
+            </div>
+        }
+
+    </div>
+
+</div>

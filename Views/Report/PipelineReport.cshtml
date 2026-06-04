@@ -1,0 +1,508 @@
+@model FanaCRM.ViewModels.Reports.OpportunityAnalyticsVM
+
+@{
+    ViewData["Title"] = "Opportunity Analytics";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .report-card {
+    border: none;
+    border-radius: 18px;
+    padding: 22px;
+    color: white;
+    height: 100%;
+    transition: .3s;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+    }
+
+    .report-card:hover {
+    transform: translateY(-5px);
+    }
+
+    .report-icon {
+    font-size: 30px;
+    margin-bottom: 12px;
+    opacity: .9;
+    }
+
+    .report-card h2 {
+    margin: 0;
+    font-weight: 700;
+    }
+
+    .report-card p {
+    margin: 0;
+    opacity: .9;
+    }
+
+    .section-card {
+    background: white;
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
+    }
+
+    .chart-container {
+    position: relative;
+    height: 350px;
+    }
+
+    .metric-number {
+    font-size: 32px;
+    font-weight: 700;
+    }
+
+    .metric-label {
+    color: #64748b;
+    }
+
+    .bg-total {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    }
+
+    .bg-open {
+    background: linear-gradient(135deg, #0284c7, #38bdf8);
+    }
+
+    .bg-won {
+    background: linear-gradient(135deg, #16a34a, #4ade80);
+    }
+
+    .bg-lost {
+    background: linear-gradient(135deg, #dc2626, #f87171);
+    }
+
+    .bg-rate {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    }
+
+    .bg-pipeline {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    }
+
+    .bg-revenue {
+    background: linear-gradient(135deg, #22c55e, #86efac);
+    }
+
+    .bg-danger-money {
+    background: linear-gradient(135deg, #ef4444, #fb7185);
+    }
+</style>
+
+<div class="container-fluid">
+
+    ```
+    <div class="mb-4">
+
+        <h2 class="fw-bold">
+            Opportunity Analytics Dashboard
+        </h2>
+
+        <p class="text-muted">
+            Opportunity performance, revenue and pipeline insights
+        </p>
+
+    </div>
+
+    <!-- FILTERS -->
+
+    <div class="section-card">
+
+        <form method="get">
+
+            <div class="row">
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Period
+                    </label>
+
+                    <select class="form-select" name="period">
+
+                        <option value="Monthly">
+                            Monthly
+                        </option>
+
+                        <option value="Yearly">
+                            Yearly
+                        </option>
+
+                        <option value="Custom">
+                            Custom
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Start Date
+                    </label>
+
+                    <input type="date" class="form-control" name="startDate" />
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        End Date
+                    </label>
+
+                    <input type="date" class="form-control" name="endDate" />
+
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+
+                    <button class="btn btn-primary w-100">
+
+                        <i class="fa-solid fa-filter"></i>
+                        Apply Filter
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- KPI CARDS -->
+
+    <div class="row g-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="report-card bg-total">
+
+                <i class="fa-solid fa-briefcase report-icon"></i>
+
+                <p>Total Opportunities</p>
+
+                <h2>@Model.TotalOpportunities</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="report-card bg-open">
+
+                <i class="fa-solid fa-folder-open report-icon"></i>
+
+                <p>Open Opportunities</p>
+
+                <h2>@Model.OpenOpportunities</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="report-card bg-won">
+
+                <i class="fa-solid fa-trophy report-icon"></i>
+
+                <p>Won Deals</p>
+
+                <h2>@Model.WonOpportunities</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="report-card bg-lost">
+
+                <i class="fa-solid fa-circle-xmark report-icon"></i>
+
+                <p>Lost Deals</p>
+
+                <h2>@Model.LostOpportunities</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="report-card bg-rate">
+
+                <i class="fa-solid fa-chart-line report-icon"></i>
+
+                <p>Win Rate</p>
+
+                <h2>@Model.WinRate.ToString("N1")%</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="report-card bg-pipeline">
+
+                <i class="fa-solid fa-funnel-dollar report-icon"></i>
+
+                <p>Pipeline Value</p>
+
+                <h2>@Model.PipelineValue.ToString("N0")</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="report-card bg-revenue">
+
+                <i class="fa-solid fa-sack-dollar report-icon"></i>
+
+                <p>Won Revenue</p>
+
+                <h2>@Model.WonRevenue.ToString("N0")</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="report-card bg-danger-money">
+
+                <i class="fa-solid fa-money-bill-trend-down report-icon"></i>
+
+                <p>Lost Revenue</p>
+
+                <h2>@Model.LostRevenue.ToString("N0")</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- INSIGHTS -->
+
+    <div class="section-card mt-4">
+
+        <h4 class="mb-4">
+            Executive Insights
+        </h4>
+
+        <div class="row text-center">
+
+            <div class="col-md-6">
+
+                <div class="metric-number">
+                    @Model.TopSalesRep
+                </div>
+
+                <div class="metric-label">
+                    Top Sales Representative
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <div class="metric-number">
+                    @Model.AverageDealSize.ToString("N0")
+                </div>
+
+                <div class="metric-label">
+                    Average Deal Size
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5 class="mb-3">
+                    Opportunities By Stage
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="stageChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5 class="mb-3">
+                    Revenue By Stage
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="revenueStageChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="section-card">
+
+        <h5 class="mb-3">
+            Revenue Trend
+        </h5>
+
+        <div class="chart-container">
+
+            <canvas id="revenueTrendChart"></canvas>
+
+        </div>
+
+    </div>
+
+    <!-- TOP SALES PEOPLE -->
+
+    <div class="section-card">
+
+        <h4 class="mb-3">
+            Top Sales Representatives
+        </h4>
+
+        <table class="table table-hover">
+
+            <thead>
+
+                <tr>
+
+                    <th>Sales Rep</th>
+                    <th>Revenue</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var rep in Model.TopSalesPeople)
+                {
+                    <tr>
+
+                        <td>@rep.SalesRepName</td>
+
+                        <td>
+                            @rep.Revenue.ToString("N2")
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+    ```
+
+</div>
+
+<script>
+
+    new Chart(
+    document.getElementById('stageChart'),
+    {
+    type: 'bar',
+    data: {
+    labels: [
+    @Html.Raw(string.Join(",",
+    Model.OpportunitiesByStage
+    .Select(x => $"'{x.Label}'")))
+    ],
+    datasets: [{
+    label: 'Opportunities',
+    data: [
+    @string.Join(",",
+    Model.OpportunitiesByStage
+    .Select(x => x.Count))
+    ]
+    }]
+    }
+    });
+
+    new Chart(
+    document.getElementById('revenueStageChart'),
+    {
+    type: 'doughnut',
+    data: {
+    labels: [
+    @Html.Raw(string.Join(",",
+    Model.RevenueByStage
+    .Select(x => $"'{x.Label}'")))
+    ],
+    datasets: [{
+    data: [
+    @string.Join(",",
+    Model.RevenueByStage
+    .Select(x => x.Amount))
+    ]
+    }]
+    }
+    });
+
+    new Chart(
+    document.getElementById('revenueTrendChart'),
+    {
+    type: 'line',
+    data: {
+    labels: [
+    @Html.Raw(string.Join(",",
+    Model.RevenueTrend
+    .Select(x => $"'{x.Label}'")))
+    ],
+    datasets: [{
+    label: 'Revenue',
+    data: [
+    @string.Join(",",
+    Model.RevenueTrend
+    .Select(x => x.Amount))
+    ],
+    tension: .4
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false
+    }
+    });
+
+</script>

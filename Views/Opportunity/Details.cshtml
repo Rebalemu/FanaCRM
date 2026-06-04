@@ -1,0 +1,423 @@
+@model FanaCRM.ViewModels.OpportunityDetailsVM
+
+@{
+    ViewData["Title"] = "Opportunity Details";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="mb-1">@Model.Name</h2>
+
+            <div class="text-muted">
+
+                <i class="bi bi-building"></i>
+                @Model.CompanyName
+
+            </div>
+        </div>
+
+        <div>
+
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+
+                <i class="bi bi-pencil"></i>
+                Edit
+
+            </a>
+
+            <a asp-action="Index" class="btn btn-secondary">
+
+                Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <!-- LEFT SIDE -->
+        <div class="col-lg-4">
+
+            <!-- OPPORTUNITY INFO -->
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        <i class="bi bi-briefcase"></i>
+                        Opportunity Information
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+
+                        <label class="fw-bold">Opportunity Name</label>
+
+                        <div>@Model.Name</div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="fw-bold">Company</label>
+
+                        <div>@Model.CompanyName</div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="fw-bold">Contact</label>
+
+                        <div>
+
+                            @(string.IsNullOrWhiteSpace(Model.ContactName)
+                                ? "-"
+                                : Model.ContactName)
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="fw-bold">Stage</label>
+
+                        <div>
+
+                            <span class="badge bg-primary">
+
+                                @Model.StageName
+                                (@Model.Probability%)
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="fw-bold">Amount</label>
+
+                        <div class="text-success fw-bold">
+
+                            @Model.Amount.ToString("N2")
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="fw-bold">Expected Close Date</label>
+
+                        <div>
+
+                            @(Model.CloseDate?.ToString("MMM dd, yyyy")
+                                ?? "-")
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="fw-bold">Assigned To</label>
+
+                        <div>@Model.AssignedToName</div>
+
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.LossReason))
+                    {
+                        <div class="alert alert-danger mb-0">
+
+                            <strong>Loss Reason</strong>
+
+                            <hr />
+
+                            @Model.LossReason
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+            <!-- UPCOMING ACTIVITIES -->
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-dark text-white">
+
+                    <h5 class="mb-0">
+
+                        <i class="bi bi-calendar-event"></i>
+                        Upcoming Activities
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    @if (Model.UpcomingActivities != null
+                   && Model.UpcomingActivities.Any())
+                    {
+                        foreach (var activity in Model.UpcomingActivities)
+                        {
+                            <div class="border-bottom pb-3 mb-3">
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <strong>
+
+                                        @activity.Subject
+
+                                    </strong>
+
+                                    @if (activity.IsOverdue)
+                                    {
+                                        <span class="badge bg-danger">
+
+                                            Overdue
+
+                                        </span>
+                                    }
+
+                                </div>
+
+                                <div class="text-muted small mt-2">
+
+                                    <i class="bi bi-tag"></i>
+
+                                    @activity.Type
+
+                                </div>
+
+                                <div class="text-muted small mt-1">
+
+                                    <i class="bi bi-clock"></i>
+
+                                    @(activity.DueDate.HasValue
+                                        ? activity.DueDate.Value
+                                            .ToString("MMM dd, yyyy hh:mm tt")
+                                        : "No Due Date")
+
+                                </div>
+
+                                <div class="mt-3">
+
+                                    <a asp-controller="Activity" asp-action="Details" asp-route-id="@activity.Id"
+                                       class="btn btn-sm btn-outline-primary">
+
+                                        View Activity
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-3">
+
+                            No upcoming activities found.
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+            <!-- PRODUCTS -->
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-success text-white">
+
+                    <h5 class="mb-0">
+
+                        <i class="bi bi-box"></i>
+                        Products
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    @if (Model.Products != null && Model.Products.Any())
+                    {
+                        <table class="table table-hover mb-0">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var p in Model.Products)
+                                {
+                                    <tr>
+
+                                        <td>@p.ProductName</td>
+
+                                        <td>@p.Quantity</td>
+
+                                        <td>@p.Price.ToString("N2")</td>
+
+                                        <td class="fw-bold">
+
+                                            @p.Total.ToString("N2")
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted p-4">
+
+                            No products found.
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="col-lg-8">
+
+            <!-- TIMELINE -->
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-info text-white">
+
+                    <h5 class="mb-0">
+
+                        <i class="bi bi-clock-history"></i>
+                        Timeline
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    @if (Model.Timeline != null && Model.Timeline.Any())
+                    {
+                        foreach (var item in Model.Timeline)
+                        {
+                            <div class="timeline-item border-start border-4 border-primary ps-3 mb-4">
+
+                                <div class="d-flex justify-content-between align-items-start">
+
+                                    <div>
+
+                                        <h6 class="fw-bold mb-1">
+
+                                            @switch (item.EventType)
+                                            {
+                                                case "Lead":
+                                                    <i class="bi bi-person text-primary"></i>
+                                                    break;
+
+                                                case "Activity":
+                                                    <i class="bi bi-check-circle text-success"></i>
+                                                    break;
+
+                                                case "Opportunity":
+                                                    <i class="bi bi-briefcase text-warning"></i>
+                                                    break;
+
+                                                case "Conversion":
+                                                    <i class="bi bi-arrow-repeat text-info"></i>
+                                                    break;
+
+                                                default:
+                                                    <i class="bi bi-clock-history"></i>
+                                                    break;
+                                            }
+
+                                            @item.Title
+
+                                        </h6>
+
+                                    </div>
+
+                                    <small class="text-muted">
+
+                                        @item.CreatedDate.ToString("MMM dd, yyyy hh:mm tt")
+
+                                    </small>
+
+                                </div>
+
+                                <div class="text-muted small mb-2">
+
+                                    <i class="bi bi-person"></i>
+
+                                    by @item.UserName
+
+                                </div>
+
+                                <div>
+
+                                    @item.Description
+
+                                </div>
+
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-5">
+
+                            No timeline history found.
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

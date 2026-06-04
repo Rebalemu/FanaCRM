@@ -1,0 +1,288 @@
+@model List<FanaCRM.ViewModels.ProductVMs.ProductIndexVM>
+
+@{
+    ViewData["Title"] = "Products";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<div class="container-fluid mt-4">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-box-seam"></i>
+                Product Management
+            </h3>
+
+            <small class="text-muted">
+                Manage CRM products and services
+            </small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+
+            <i class="bi bi-plus-circle"></i>
+            New Product
+
+        </a>
+
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow border-0">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table id="productsTable" class="table table-hover table-striped align-middle w-100">
+
+                    <!-- TABLE HEAD -->
+                    <thead class="table-dark">
+
+                        <!-- FILTER HEADER -->
+                        <tr>
+
+                            <!-- NAME SEARCH -->
+                            <th>
+                                <input type="text" placeholder="Search Product"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- PRICE SEARCH -->
+                            <th>
+                                <input type="text" placeholder="Search Price"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- STATUS FILTER -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Status</option>
+                                </select>
+                            </th>
+
+                            <!-- ACTION -->
+                            <th>Actions</th>
+
+                        </tr>
+
+                      
+                        
+
+                    </thead>
+
+                    <!-- TABLE BODY -->
+                    <tbody>
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+
+                                <td colspan="4" class="text-center text-muted py-4">
+
+                                    No products found
+
+                                </td>
+
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <!-- PRODUCT NAME -->
+                                    <td class="fw-semibold">
+
+                                        @item.Name
+
+                                    </td>
+
+                                    <!-- PRICE -->
+                                    <td class="text-success fw-bold">
+
+                                        $@item.Price.ToString("N2")
+
+                                    </td>
+
+                                    <!-- STATUS -->
+                                    <td>
+
+                                        <span
+                                            class="badge @(item.IsActive
+                                                                                                                                                                                                                          ? "bg-success"
+                                                                                                                                                                                                                          : "bg-secondary")">
+
+                                            @(item.IsActive
+                                                ? "Active"
+                                                : "Inactive")
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- ACTIONS -->
+                                    <td class="text-center">
+
+                                        <div class="btn-group">
+
+                                            <!-- EDIT -->
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+
+                                                <i class="bi bi-pencil-square"></i>
+
+                                            </a>
+
+                                            <!-- DETAILS -->
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+
+                                                <i class="bi bi-eye-fill"></i>
+
+                                            </a>
+
+                                            <!-- DELETE -->
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                                    data-bs-target="#deleteModal" data-id="@item.Id">
+
+                                                <i class="bi bi-trash-fill"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@await Html.PartialAsync("_DeleteModal")
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            // INITIALIZE DATATABLE
+            var table = $('#productsTable').DataTable({
+
+                responsive: true,
+                autoWidth: false,
+
+                pageLength: 10,
+
+                order: [[0, 'asc']],
+
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: 3
+                    }
+                ],
+
+                language: {
+
+                    search: "_INPUT_",
+
+                    searchPlaceholder: "Global Search..."
+
+                }
+
+            });
+
+            // COLUMN SEARCHING
+            $('#productsTable thead tr:eq(0) th').each(function (i) {
+
+                // INPUT SEARCH
+                $('input', this).on('keyup change', function () {
+
+                    if (table.column(i).search() !== this.value) {
+
+                        table
+                            .column(i)
+                            .search(this.value)
+                            .draw();
+
+                    }
+
+                });
+
+                // DROPDOWN SEARCH
+                $('select', this).on('change', function () {
+
+                    table
+                        .column(i)
+                        .search($(this).val())
+                        .draw();
+
+                });
+
+            });
+
+            // POPULATE STATUS DROPDOWN
+            table.columns().every(function () {
+
+                var column = this;
+
+                if (column.index() == 2) {
+
+                    var select = $('.searchable-dropdown');
+
+                    var uniqueValues = [];
+
+                    column.data().each(function (d) {
+
+                        var text = $('<div>').html(d).text().trim();
+
+                        if (text !== '' &&
+                            !uniqueValues.includes(text)) {
+
+                            uniqueValues.push(text);
+
+                            select.append(
+                                `<option value="${text}">${text}</option>`
+                            );
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+            // SELECT2
+            $('.searchable-dropdown').select2({
+
+                theme: 'bootstrap-5',
+
+                width: '100%',
+
+                placeholder: 'Select Status',
+
+                allowClear: true
+
+            });
+
+        });
+
+    </script>
+
+}

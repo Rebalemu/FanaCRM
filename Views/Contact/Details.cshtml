@@ -1,0 +1,43 @@
+@model FanaCRM.ViewModels.ContactEditVM
+
+@{
+    ViewData["Title"] = "Contact Details";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5>Contact Details</h5>
+        </div>
+
+        <div class="card-body">
+
+            <dl class="row">
+                <dt class="col-sm-3">Full Name</dt>
+                <dd class="col-sm-9">@Model.FullName</dd>
+
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+
+                <dt class="col-sm-3">Phone</dt>
+                <dd class="col-sm-9">@Model.Phone</dd>
+
+                <dt class="col-sm-3">Position</dt>
+                <dd class="col-sm-9">
+                    @(string.IsNullOrEmpty(Model.Position) ? "N/A" : Model.Position)
+                </dd>
+
+                <dt class="col-sm-3">Company</dt>
+                <dd class="col-sm-9">
+                    @Model.Companies?.FirstOrDefault(c => c.Value == Model.CompanyId.ToString())?.Text
+                </dd>
+            </dl>
+
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Back</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+            </div>
+
+        </div>
+    </div>
+</div>

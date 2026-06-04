@@ -1,0 +1,110 @@
+@model FanaCRM.ViewModels.CompanyDetailsVM
+
+@{
+    ViewData["Title"] = "Company Details";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Company Details</h3>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="bi bi-pencil-square"></i> Edit
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">← Back</a>
+        </div>
+    </div>
+
+    <!-- Company Info -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-2">
+                    <strong>Name:</strong> @Model.Name
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <strong>Industry:</strong>
+                    @(string.IsNullOrEmpty(Model.Industry) ? "N/A" : Model.Industry)
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <strong>Website:</strong>
+                    @if (!string.IsNullOrEmpty(Model.Website))
+                    {
+                        <a href="@Model.Website" target="_blank">Visit</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">N/A</span>
+                    }
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <strong>Phone:</strong> @Model.Phone
+                </div>
+
+                <div class="col-md-12 mb-2">
+                    <strong>Address:</strong> @Model.Address
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <strong>Created Date:</strong> @Model.CreatedDate.ToString("yyyy-MM-dd")
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Contacts Section -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Contacts</h5>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.Contacts != null && Model.Contacts.Any())
+            {
+                <table class="table table-hover table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Position</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Contacts)
+                        {
+                            <tr>
+                                <td>@c.FullName</td>
+
+                                <td>
+                                    <a href="mailto:@c.Email">@c.Email</a>
+                                </td>
+
+                                <td>@c.Phone</td>
+
+                                <td>
+                                    @(string.IsNullOrEmpty(c.Position) ? "N/A" : c.Position)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted">No contacts found for this company.</p>
+            }
+
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,456 @@
+@model FanaCRM.ViewModels.Reports.LeadAnalyticsVM
+
+@{
+    ViewData["Title"] = "Lead Analytics";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .report-card {
+    border: none;
+    border-radius: 18px;
+    padding: 20px;
+    color: white;
+    transition: .3s;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+    height: 100%;
+    }
+
+    .report-card:hover {
+    transform: translateY(-4px);
+    }
+
+    .report-icon {
+    font-size: 30px;
+    opacity: .85;
+    margin-bottom: 10px;
+    }
+
+    .report-card h2 {
+    font-weight: 700;
+    margin: 0;
+    }
+
+    .report-card p {
+    margin: 0;
+    opacity: .9;
+    }
+
+    .bg-total {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    }
+
+    .bg-new {
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+    }
+
+    .bg-contacted {
+    background: linear-gradient(135deg, #06b6d4, #22d3ee);
+    }
+
+    .bg-qualified {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    }
+
+    .bg-converted {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    }
+
+    .bg-lost {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    }
+
+    .bg-rate {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    }
+
+    .section-card {
+    background: white;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
+    margin-bottom: 24px;
+    }
+
+    .chart-container {
+    position: relative;
+    height: 350px;
+    }
+
+    .insight-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: #0f172a;
+    }
+
+    .insight-label {
+    color: #64748b;
+    }
+</style>
+
+<div class="container-fluid">
+
+    ```
+    <!-- HEADER -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">Lead Analytics Dashboard</h2>
+            <p class="text-muted">
+                Monitor lead generation, conversion and engagement performance
+            </p>
+        </div>
+
+    </div>
+
+    <!-- FILTERS -->
+
+    <div class="section-card">
+
+        <form method="get">
+
+            <div class="row">
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Reporting Period
+                    </label>
+
+                    <select name="period" class="form-select">
+
+                        <option value="Monthly">
+                            Monthly
+                        </option>
+
+                        <option value="Yearly">
+                            Yearly
+                        </option>
+
+                        <option value="Custom">
+                            Custom
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Start Date
+                    </label>
+
+                    <input type="date" class="form-control" name="startDate">
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        End Date
+                    </label>
+
+                    <input type="date" class="form-control" name="endDate">
+
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+
+                    <button class="btn btn-primary w-100">
+
+                        <i class="fa-solid fa-filter"></i>
+                        Apply Filter
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- KPI CARDS -->
+
+    <div class="row g-4">
+
+        <div class="col-lg col-md-4">
+
+            <div class="report-card bg-total">
+
+                <i class="fa-solid fa-users report-icon"></i>
+
+                <p>Total Leads</p>
+
+                <h2>@Model.TotalLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg col-md-4">
+
+            <div class="report-card bg-new">
+
+                <i class="fa-solid fa-user-plus report-icon"></i>
+
+                <p>New Leads</p>
+
+                <h2>@Model.NewLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg col-md-4">
+
+            <div class="report-card bg-contacted">
+
+                <i class="fa-solid fa-phone report-icon"></i>
+
+                <p>Contacted</p>
+
+                <h2>@Model.ContactedLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg col-md-4">
+
+            <div class="report-card bg-qualified">
+
+                <i class="fa-solid fa-user-check report-icon"></i>
+
+                <p>Qualified</p>
+
+                <h2>@Model.QualifiedLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg col-md-4">
+
+            <div class="report-card bg-converted">
+
+                <i class="fa-solid fa-arrows-rotate report-icon"></i>
+
+                <p>Converted</p>
+
+                <h2>@Model.ConvertedLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg col-md-4">
+
+            <div class="report-card bg-lost">
+
+                <i class="fa-solid fa-circle-xmark report-icon"></i>
+
+                <p>Lost</p>
+
+                <h2>@Model.LostLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg col-md-4">
+
+            <div class="report-card bg-rate">
+
+                <i class="fa-solid fa-chart-line report-icon"></i>
+
+                <p>Conversion Rate</p>
+
+                <h2>@Model.ConversionRate.ToString("N1")%</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- INSIGHTS -->
+
+    <div class="section-card mt-4">
+
+        <h4 class="mb-4">
+            Executive Insights
+        </h4>
+
+        <div class="row text-center">
+
+            <div class="col-md-6">
+
+                <div class="insight-number">
+                    @Model.BestLeadSource
+                </div>
+
+                <div class="insight-label">
+                    Best Lead Source
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <div class="insight-number">
+                    @Model.LeadsWithoutActivity
+                </div>
+
+                <div class="insight-label">
+                    Leads Without Activity
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5 class="mb-3">
+                    Lead Sources
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="sourceChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5 class="mb-3">
+                    Lead Status Distribution
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="statusChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- AGING -->
+
+    <div class="section-card">
+
+        <h5 class="mb-3">
+            Lead Aging Analysis
+        </h5>
+
+        <div class="chart-container">
+
+            <canvas id="agingChart"></canvas>
+
+        </div>
+
+    </div>
+    ```
+
+</div>
+
+<script>
+
+    new Chart(
+    document.getElementById('sourceChart'),
+    {
+    type: 'pie',
+    data: {
+    labels: [
+    @Html.Raw(
+        string.Join(",",
+        Model.LeadsBySource
+        .Select(x => $"'{x.Label}'"))
+            )
+    ],
+    datasets: [{
+    data: [
+    @string.Join(",",
+    Model.LeadsBySource
+    .Select(x => x.Count))
+    ]
+    }]
+    }
+    });
+
+    new Chart(
+    document.getElementById('statusChart'),
+    {
+    type: 'doughnut',
+    data: {
+    labels: [
+    @Html.Raw(
+        string.Join(",",
+        Model.LeadsByStatus
+        .Select(x => $"'{x.Label}'"))
+            )
+    ],
+    datasets: [{
+    data: [
+    @string.Join(",",
+    Model.LeadsByStatus
+    .Select(x => x.Count))
+    ]
+    }]
+    }
+    });
+
+    new Chart(
+    document.getElementById('agingChart'),
+    {
+    type: 'bar',
+    data: {
+    labels: [
+    @Html.Raw(
+        string.Join(",",
+        Model.AgingBuckets
+        .Select(x => $"'{x.Range}'"))
+            )
+    ],
+    datasets: [{
+    label: 'Lead Count',
+    data: [
+    @string.Join(",",
+    Model.AgingBuckets
+    .Select(x => x.Count))
+    ]
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false
+    }
+    });
+
+</script>

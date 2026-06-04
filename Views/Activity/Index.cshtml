@@ -1,0 +1,434 @@
+@model List<FanaCRM.ViewModels.ActivityIndexVM>
+
+@{
+    ViewData["Title"] = "Activities";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<div class="container-fluid mt-4">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-activity"></i>
+                Activity Management
+            </h3>
+
+            <small class="text-muted">
+                Manage calls, meetings, tasks, and follow-ups
+            </small>
+
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+
+            <i class="bi bi-plus-circle"></i>
+            New Activity
+
+        </a>
+
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow border-0">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table id="activityTable" class="table table-hover table-striped align-middle w-100">
+
+                    <!-- TABLE HEADER -->
+                    <thead class="table-dark">
+
+                        <!-- FILTER ROW -->
+                        <tr>
+
+                            <!-- SUBJECT -->
+                            <th>
+                                <input type="text" placeholder="Search Subject"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- TYPE -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Types</option>
+                                </select>
+                            </th>
+
+                            <!-- COMPANY -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Companies</option>
+                                </select>
+                            </th>
+
+                            <!-- CONTACT -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Contacts</option>
+                                </select>
+                            </th>
+
+                            <!-- ASSIGNED -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Users</option>
+                                </select>
+                            </th>
+
+                            <!-- DUE DATE -->
+                            <th>
+                                <input type="text" placeholder="Search Due Date"
+                                       class="form-control form-control-sm column-search" />
+                            </th>
+
+                            <!-- STATUS -->
+                            <th>
+                                <select class="form-select form-select-sm searchable-dropdown">
+                                    <option value="">All Statuses</option>
+                                </select>
+                            </th>
+
+                            <!-- ACTION -->
+                            <th>
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <!-- TABLE BODY -->
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <!-- SUBJECT -->
+                                    <td class="fw-semibold">
+
+                                        @item.Subject
+
+                                    </td>
+
+                                    <!-- TYPE -->
+                                    <td>
+
+                                        <span class="badge bg-secondary">
+
+                                            @item.TypeName
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- COMPANY -->
+                                    <td>
+
+                                        @(string.IsNullOrWhiteSpace(item.CompanyName)
+                                            ? "N/A"
+                                            : item.CompanyName)
+
+                                    </td>
+
+                                    <!-- CONTACT -->
+                                    <td>
+
+                                        @(string.IsNullOrWhiteSpace(item.ContactName)
+                                            ? "N/A"
+                                            : item.ContactName)
+
+                                    </td>
+
+                                    <!-- ASSIGNED -->
+                                    <td>
+
+                                        @item.AssignedTo
+
+                                    </td>
+
+                                    <!-- DUE DATE -->
+                                    <td>
+
+                                        @(item.DueDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+
+                                        @if (item.DueDate.HasValue
+                                       && item.DueDate.Value < DateTime.Now
+                                       && !item.IsCompleted)
+                                        {
+                                            <span class="badge bg-danger ms-1">
+
+                                                Overdue
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- STATUS -->
+                                    <td>
+
+                                        @{
+                                            var statusClass = item.Status switch
+                                            {
+                                                "Open" => "bg-primary",
+                                                "Completed" => "bg-success",
+                                                "Cancelled" => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+
+                                        <span class="badge @statusClass">
+
+                                            @item.Status
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- ACTIONS -->
+                                    <td class="text-end">
+
+                                        <div class="btn-group">
+
+                                            <!-- DETAILS -->
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+
+                                                <i class="bi bi-eye-fill"></i>
+
+                                            </a>
+
+                                            <!-- EDIT -->
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+
+                                                <i class="bi bi-pencil-square"></i>
+
+                                            </a>
+
+                                            <!-- COMPLETE -->
+                                            @if (!item.IsCompleted)
+                                            {
+                                                <form asp-action="Complete" asp-route-id="@item.Id" method="post" class="d-inline">
+
+                                                    @Html.AntiForgeryToken()
+
+                                                    <button class="btn btn-sm btn-success">
+
+                                                        <i class="bi bi-check-circle"></i>
+
+                                                    </button>
+
+                                                </form>
+                                            }
+
+                                            <!-- CANCEL -->
+                                            <form asp-action="Cancel" asp-route-id="@item.Id" method="post" class="d-inline">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <button class="btn btn-sm btn-danger">
+
+                                                    <i class="bi bi-x-circle"></i>
+
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="8" class="text-center text-muted py-5">
+
+                                    No activities found.
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            // =====================================
+            // SELECT2
+            // =====================================
+
+            $('.searchable-dropdown').select2({
+
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Select',
+                allowClear: true
+
+            });
+
+            // =====================================
+            // DATATABLE
+            // =====================================
+
+            var table = $('#activityTable').DataTable({
+
+                responsive: true,
+
+                autoWidth: false,
+
+                orderCellsTop: true,
+
+                fixedHeader: true,
+
+                pageLength: 10,
+
+                order: [[5, 'desc']],
+
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: 7
+                    }
+                ],
+
+                language: {
+
+                    search: "_INPUT_",
+
+                    searchPlaceholder: "Global Search..."
+
+                },
+
+                initComplete: function () {
+
+                    var api = this.api();
+
+                    // TYPE
+                    createDropdownFilter(api, 1);
+
+                    // COMPANY
+                    createDropdownFilter(api, 2);
+
+                    // CONTACT
+                    createDropdownFilter(api, 3);
+
+                    // ASSIGNED
+                    createDropdownFilter(api, 4);
+
+                    // STATUS
+                    createDropdownFilter(api, 6);
+
+                }
+
+            });
+
+            // =====================================
+            // TEXT FILTERS
+            // =====================================
+
+            $('#activityTable thead tr:eq(0) th').each(function (i) {
+
+                var input = $(this).find('input');
+
+                if (input.length > 0) {
+
+                    $(input).on('keyup change', function () {
+
+                        if (table.column(i).search() !== this.value) {
+
+                            table
+                                .column(i)
+                                .search(this.value)
+                                .draw();
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+            // =====================================
+            // DROPDOWN FILTERS
+            // =====================================
+
+            function createDropdownFilter(api, columnIndex) {
+
+                var column = api.column(columnIndex);
+
+                var select = $('#activityTable thead tr:eq(0) th')
+                    .eq(columnIndex)
+                    .find('select');
+
+                var uniqueValues = [];
+
+                column.data().each(function (d) {
+
+                    var text = $('<div>').html(d).text().trim();
+
+                    if (text !== '' &&
+                        text !== 'N/A' &&
+                        !uniqueValues.includes(text)) {
+
+                        uniqueValues.push(text);
+
+                    }
+
+                });
+
+                uniqueValues.sort();
+
+                uniqueValues.forEach(function (d) {
+
+                    select.append(
+                        `<option value="${d}">${d}</option>`
+                    );
+
+                });
+
+                // FILTER EVENT
+                select.on('change', function () {
+
+                    var value = $(this).val();
+
+                    column
+                        .search(value ? '^' + value + '$' : '', true, false)
+                        .draw();
+
+                });
+
+            }
+
+        });
+
+    </script>
+
+}

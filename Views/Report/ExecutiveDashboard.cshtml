@@ -1,0 +1,507 @@
+@model FanaCRM.ViewModels.Reports.ExecutiveDashboardVM
+
+@{
+    ViewData["Title"] = "Executive Dashboard";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+    .dashboard-card {
+        border: none;
+        border-radius: 18px;
+        padding: 20px;
+        color: white;
+        transition: .3s;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .card-icon {
+        font-size: 32px;
+        opacity: .85;
+    }
+
+    .dashboard-card h2 {
+        font-weight: 700;
+        margin-top: 10px;
+    }
+
+    .bg-leads {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+    }
+
+    .bg-qualified {
+        background: linear-gradient(135deg, #0891b2, #06b6d4);
+    }
+
+    .bg-conversion {
+        background: linear-gradient(135deg, #10b981, #34d399);
+    }
+
+    .bg-pipeline {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    }
+
+    .bg-revenue {
+        background: linear-gradient(135deg, #22c55e, #4ade80);
+    }
+
+    .bg-winrate {
+        background: linear-gradient(135deg, #ec4899, #f472b6);
+    }
+
+    .section-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
+        margin-bottom: 24px;
+    }
+
+    .summary-item {
+        text-align: center;
+        padding: 15px;
+    }
+
+    .summary-item h3 {
+        font-weight: 700;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 350px;
+    }
+
+    .table thead {
+        background: #f8fafc;
+    }
+</style>
+
+<div class="container-fluid">
+
+    ```
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Executive Dashboard</h2>
+            <p class="text-muted">
+                Sales, Leads, Revenue and Pipeline Overview
+            </p>
+        </div>
+    </div>
+
+    <!-- FILTERS -->
+
+    <div class="section-card">
+
+        <form method="get">
+
+            <div class="row">
+
+                <div class="col-md-3">
+
+                    <label>Period</label>
+
+                    <select name="period" class="form-select">
+
+                        <option value="Monthly">Monthly</option>
+                        <option value="Yearly">Yearly</option>
+                        <option value="Custom">Custom</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label>Start Date</label>
+
+                    <input type="date" name="startDate" class="form-control" />
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label>End Date</label>
+
+                    <input type="date" name="endDate" class="form-control" />
+
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+
+                    <button class="btn btn-primary w-100">
+                        Apply Filters
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- KPI ROW -->
+
+    <div class="row g-4">
+
+        <div class="col-lg-2 col-md-4">
+
+            <div class="dashboard-card bg-leads">
+
+                <i class="fa-solid fa-user-plus card-icon"></i>
+
+                <h6>Total Leads</h6>
+
+                <h2>@Model.TotalLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-2 col-md-4">
+
+            <div class="dashboard-card bg-qualified">
+
+                <i class="fa-solid fa-user-check card-icon"></i>
+
+                <h6>Qualified</h6>
+
+                <h2>@Model.QualifiedLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-2 col-md-4">
+
+            <div class="dashboard-card bg-conversion">
+
+                <i class="fa-solid fa-rotate card-icon"></i>
+
+                <h6>Conversion</h6>
+
+                <h2>@Model.LeadConversionRate.ToString("N1")%</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-2 col-md-4">
+
+            <div class="dashboard-card bg-pipeline">
+
+                <i class="fa-solid fa-funnel-dollar card-icon"></i>
+
+                <h6>Pipeline</h6>
+
+                <h2>@Model.PipelineValue.ToString("N0")</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-2 col-md-4">
+
+            <div class="dashboard-card bg-revenue">
+
+                <i class="fa-solid fa-sack-dollar card-icon"></i>
+
+                <h6>Won Revenue</h6>
+
+                <h2>@Model.WonRevenue.ToString("N0")</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-2 col-md-4">
+
+            <div class="dashboard-card bg-winrate">
+
+                <i class="fa-solid fa-trophy card-icon"></i>
+
+                <h6>Win Rate</h6>
+
+                <h2>@Model.WinRate.ToString("N1")%</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- EXECUTIVE SUMMARY -->
+
+    <div class="section-card mt-4">
+
+        <h4 class="mb-4">Executive Summary</h4>
+
+        <div class="row">
+
+            <div class="col-md-3 summary-item">
+
+                <h3>@Model.OpenOpportunities</h3>
+
+                <p>Open Opportunities</p>
+
+            </div>
+
+            <div class="col-md-3 summary-item">
+
+                <h3>@Model.CompletedActivities</h3>
+
+                <p>Completed Activities</p>
+
+            </div>
+
+            <div class="col-md-3 summary-item">
+
+                <h3>@Model.LostRevenue.ToString("N0")</h3>
+
+                <p>Lost Revenue</p>
+
+            </div>
+
+            <div class="col-md-3 summary-item">
+
+                <h3>@Model.TopSalesRep</h3>
+
+                <p>Top Sales Rep</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5>Lead Sources</h5>
+
+                <div class="chart-container">
+                    <canvas id="leadSourceChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5>Lead Status Distribution</h5>
+
+                <div class="chart-container">
+                    <canvas id="leadStatusChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5>Pipeline Stages</h5>
+
+                <div class="chart-container">
+                    <canvas id="pipelineChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5>Revenue Trend</h5>
+
+                <div class="chart-container">
+                    <canvas id="revenueTrendChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TOP SALES -->
+
+    <div class="section-card">
+
+        <h4 class="mb-3">Top Sales Representatives</h4>
+
+        <table class="table table-hover">
+
+            <thead>
+
+                <tr>
+
+                    <th>Sales Rep</th>
+                    <th>Revenue</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var rep in Model.TopSalesPeople)
+                {
+                    <tr>
+
+                        <td>@rep.SalesRepName</td>
+
+                        <td>
+                            @rep.Revenue.ToString("N2")
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    const leadSourceLabels =
+    [
+    @Html.Raw(string.Join(",",
+        Model.LeadSources.Select(x => $"'{x.Label}'")))
+    ];
+
+    const leadSourceData =
+    [
+    @string.Join(",",
+        Model.LeadSources.Select(x => x.Count))
+    ];
+
+    new Chart(
+    document.getElementById('leadSourceChart'),
+    {
+    type: 'pie',
+
+    data:
+    {
+    labels: leadSourceLabels,
+
+    datasets: [{
+    data: leadSourceData
+    }]
+    }
+    });
+
+    const statusLabels =
+    [
+    @Html.Raw(string.Join(",",
+        Model.LeadStatuses.Select(x => $"'{x.Label}'")))
+    ];
+
+    const statusData =
+    [
+    @string.Join(",",
+        Model.LeadStatuses.Select(x => x.Count))
+    ];
+
+    new Chart(
+    document.getElementById('leadStatusChart'),
+    {
+    type: 'doughnut',
+
+    data:
+    {
+    labels: statusLabels,
+
+    datasets: [{
+    data: statusData
+    }]
+    }
+    });
+
+    const stageLabels =
+    [
+    @Html.Raw(string.Join(",",
+        Model.PipelineStages.Select(x => $"'{x.Label}'")))
+    ];
+
+    const stageData =
+    [
+    @string.Join(",",
+        Model.PipelineStages.Select(x => x.Amount))
+    ];
+
+    new Chart(
+    document.getElementById('pipelineChart'),
+    {
+    type: 'bar',
+
+    data:
+    {
+    labels: stageLabels,
+
+    datasets: [{
+    label: 'Pipeline Value',
+    data: stageData
+    }]
+    }
+    });
+
+    const revenueLabels =
+    [
+    @Html.Raw(string.Join(",",
+        Model.RevenueTrend.Select(x => $"'{x.Label}'")))
+    ];
+
+    const revenueData =
+    [
+    @string.Join(",",
+        Model.RevenueTrend.Select(x => x.Amount))
+    ];
+
+    new Chart(
+    document.getElementById('revenueTrendChart'),
+    {
+    type: 'line',
+
+    data:
+    {
+    labels: revenueLabels,
+
+    datasets: [{
+    label: 'Revenue',
+    data: revenueData,
+    tension: .4
+    }]
+    }
+    });
+
+</script>

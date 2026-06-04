@@ -1,0 +1,457 @@
+@model FanaCRM.ViewModels.Reports.SalesPerformanceVM
+
+@{
+    ViewData["Title"] = "Sales Performance";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+
+    var totalRevenue = Model.SalesPeople.Sum(x => x.Revenue);
+    var totalLeads = Model.SalesPeople.Sum(x => x.TotalLeads);
+    var totalWonDeals = Model.SalesPeople.Sum(x => x.WonDeals);
+
+    var avgConversion =
+        Model.SalesPeople.Any()
+        ? Model.SalesPeople.Average(x => x.ConversionRate)
+        : 0;
+
+    var avgWinRate =
+        Model.SalesPeople.Any()
+        ? Model.SalesPeople.Average(x => x.WinRate)
+        : 0;
+
+    var topRep =
+        Model.SalesPeople
+        .OrderByDescending(x => x.Revenue)
+        .FirstOrDefault();
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .metric-card {
+    border: none;
+    border-radius: 18px;
+    color: white;
+    padding: 22px;
+    transition: .3s;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+    height: 100%;
+    }
+
+    .metric-card:hover {
+    transform: translateY(-5px);
+    }
+
+    .metric-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    opacity: .9;
+    }
+
+    .metric-card h2 {
+    margin: 0;
+    font-weight: 700;
+    }
+
+    .metric-card p {
+    margin: 0;
+    opacity: .9;
+    }
+
+    .bg-revenue {
+    background: linear-gradient(135deg, #16a34a, #4ade80);
+    }
+
+    .bg-leads {
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    }
+
+    .bg-conversion {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    }
+
+    .bg-win {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    }
+
+    .bg-top {
+    background: linear-gradient(135deg, #0f766e, #2dd4bf);
+    }
+
+    .section-card {
+    background: white;
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
+    }
+
+    .chart-container {
+    position: relative;
+    height: 350px;
+    }
+
+    .insight-number {
+    font-size: 32px;
+    font-weight: 700;
+    }
+
+    .insight-label {
+    color: #64748b;
+    }
+</style>
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold">
+            Sales Performance Dashboard
+        </h2>
+
+        <p class="text-muted">
+            Analyze sales productivity, conversion efficiency and revenue performance
+        </p>
+
+    </div>
+
+    <!-- KPI CARDS -->
+
+    <div class="row g-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="metric-card bg-revenue">
+
+                <i class="fa-solid fa-sack-dollar metric-icon"></i>
+
+                <p>Total Revenue</p>
+
+                <h2>@totalRevenue.ToString("N0")</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="metric-card bg-leads">
+
+                <i class="fa-solid fa-users metric-icon"></i>
+
+                <p>Total Leads</p>
+
+                <h2>@totalLeads</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="metric-card bg-conversion">
+
+                <i class="fa-solid fa-arrow-right-arrow-left metric-icon"></i>
+
+                <p>Avg Conversion Rate</p>
+
+                <h2>@avgConversion.ToString("N1")%</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="metric-card bg-win">
+
+                <i class="fa-solid fa-trophy metric-icon"></i>
+
+                <p>Won Deals</p>
+
+                <h2>@totalWonDeals</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- EXECUTIVE INSIGHTS -->
+
+    <div class="section-card mt-4">
+
+        <h4 class="mb-4">
+            Executive Insights
+        </h4>
+
+        <div class="row text-center">
+
+            <div class="col-md-4">
+
+                <div class="insight-number">
+                    @(topRep?.SalesRepName ?? "-")
+                </div>
+
+                <div class="insight-label">
+                    Top Sales Representative
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="insight-number">
+                    @avgWinRate.ToString("N1")%
+                </div>
+
+                <div class="insight-label">
+                    Average Win Rate
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="insight-number">
+                    @Model.SalesPeople.Count
+                </div>
+
+                <div class="insight-label">
+                    Active Sales Representatives
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CHARTS ROW 1 -->
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5 class="mb-3">
+                    Revenue by Sales Representative
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="revenueChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5 class="mb-3">
+                    Conversion Rate Comparison
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="conversionChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CHARTS ROW 2 -->
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5 class="mb-3">
+                    Win Rate by Sales Representative
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="winRateChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="section-card">
+
+                <h5 class="mb-3">
+                    Leads vs Opportunities
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="pipelineChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PERFORMANCE TABLE -->
+
+    <div class="section-card">
+
+        <h4 class="mb-3">
+            Sales Performance Ranking
+        </h4>
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th>Sales Rep</th>
+                    <th>Revenue</th>
+                    <th>Leads</th>
+                    <th>Won Deals</th>
+                    <th>Conversion %</th>
+                    <th>Win %</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var rep in Model.SalesPeople.OrderByDescending(x => x.Revenue))
+                {
+                    <tr>
+
+                        <td>@rep.SalesRepName</td>
+
+                        <td>
+                            @rep.Revenue.ToString("N2")
+                        </td>
+
+                        <td>@rep.TotalLeads</td>
+
+                        <td>@rep.WonDeals</td>
+
+                        <td>
+                            @rep.ConversionRate.ToString("N1")%
+                        </td>
+
+                        <td>
+                            @rep.WinRate.ToString("N1")%
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+    const labels = [
+    @Html.Raw(string.Join(",",
+    Model.SalesPeople.Select(x => $"'{x.SalesRepName}'")))
+    ];
+
+    new Chart(
+    document.getElementById('revenueChart'),
+    {
+    type: 'bar',
+    data: {
+    labels: labels,
+    datasets: [{
+    label: 'Revenue',
+    data: [
+    @string.Join(",",
+    Model.SalesPeople.Select(x => x.Revenue))
+    ]
+    }]
+    }
+    });
+
+    new Chart(
+    document.getElementById('conversionChart'),
+    {
+    type: 'bar',
+    data: {
+    labels: labels,
+    datasets: [{
+    label: 'Conversion %',
+    data: [
+    @string.Join(",",
+    Model.SalesPeople.Select(x => x.ConversionRate))
+    ]
+    }]
+    }
+    });
+
+    new Chart(
+    document.getElementById('winRateChart'),
+    {
+    type: 'line',
+    data: {
+    labels: labels,
+    datasets: [{
+    label: 'Win Rate %',
+    data: [
+    @string.Join(",",
+    Model.SalesPeople.Select(x => x.WinRate))
+    ],
+    tension: .4
+    }]
+    }
+    });
+
+    new Chart(
+    document.getElementById('pipelineChart'),
+    {
+    type: 'bar',
+    data: {
+    labels: labels,
+    datasets: [
+    {
+    label: 'Leads',
+    data: [
+    @string.Join(",",
+    Model.SalesPeople.Select(x => x.TotalLeads))
+    ]
+    },
+    {
+    label: 'Opportunities',
+    data: [
+    @string.Join(",",
+    Model.SalesPeople.Select(x => x.Opportunities))
+    ]
+    }]
+    }
+    });
+
+</script>

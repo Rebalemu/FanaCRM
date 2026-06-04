@@ -1,0 +1,167 @@
+@model FanaCRM.ViewModels.SalesDashboardVM
+
+@{
+    ViewData["Title"] = "Sales Dashboard";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="text-xl p-2">Sales Dashboard</h1>
+
+    <!-- FILTER -->
+    <div class="mb-3">
+        <a asp-action="Index" asp-route-filter="today"
+           class="btn btn-sm @(Model.Filter == "today" ? "btn-primary" : "btn-outline-primary") mx-1">Today</a>
+
+        <a asp-action="Index" asp-route-filter="week"
+           class="btn btn-sm @(Model.Filter == "week" ? "btn-primary" : "btn-outline-primary") mx-1">This Week</a>
+
+        <a asp-action="Index" asp-route-filter="month"
+           class="btn btn-sm @(Model.Filter == "month" ? "btn-primary" : "btn-outline-primary") mx-1">This Month</a>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="row">
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>@Model.TotalLeads</h3>
+                    <p>Total Leads</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <a asp-controller="Lead" asp-action="Index" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <h3 class="fw-bold mb-1">
+                                @Model.ClosedDeals
+                            </h3>
+
+                            <p class="mb-2 fw-semibold">
+                                Closed Deals
+                            </p>
+
+                            <div class="d-flex gap-2 ">
+
+                                <span class="badge bg-success px-3 py-2 rounded-pill shadow-sm opacity-120">
+                                    <i class="fas fa-trophy me-1"></i>
+                                    Won: @Model.WonDeals
+                                </span>
+
+                                <span class="badge bg-danger px-3 py-2 rounded-pill shadow-sm">
+                                    <i class="fas fa-times-circle me-1"></i>
+                                    Lost: @Model.LostDeals
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="opacity-25 p-0 m-0">
+                            <i class="fas fa-handshake fa-3x  "></i>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <a asp-controller="Opportunity" asp-action="Index" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>@Model.TotalPipelineValue.ToString("N0")</h3>
+                    <p>Pipeline Value</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <a asp-controller="Opportunity" asp-action="Index" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    <h3>@Model.MonthlyRevenue.ToString("N0")</h3>
+                    <p>Monthly Revenue</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <a asp-controller="Opportunity" asp-action="Index" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row mt-4">
+
+        <div class="col-md-6">
+            <canvas id="salesTrendChart"></canvas>
+        </div>
+
+        <div class="col-md-6">
+            <canvas id="conversionChart"></canvas>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const labels = @Html.Raw(Json.Serialize(Model.Labels));
+    const salesData = @Html.Raw(Json.Serialize(Model.SalesData));
+    const conversionData = @Html.Raw(Json.Serialize(Model.ConversionData));
+
+    // Sales Trend
+    new Chart(document.getElementById('salesTrendChart'), {
+    type: 'line',
+    data: {
+    labels: labels,
+    datasets: [{
+    label: 'Sales',
+    data: salesData,
+    borderWidth: 2,
+    tension: 0.3
+    }]
+    }
+    });
+
+    // Conversion Rate
+    new Chart(document.getElementById('conversionChart'), {
+    type: 'bar',
+    data: {
+    labels: labels,
+    datasets: [{
+    label: 'Conversion Rate (%)',
+    data: conversionData
+    }]
+    }
+    });
+</script>

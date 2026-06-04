@@ -1,0 +1,120 @@
+@model FanaCRM.ViewModels.DashboardVM
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="text-xl p-2">Dashboard</h1>
+
+    <div class="mb-3">
+        <a asp-action="Index" asp-route-filter="today"
+           class="btn btn-sm @(Model.Filter == "today" ? "btn-primary" : "btn-outline-primary") mx-1">Today</a>
+
+        <a asp-action="Index" asp-route-filter="week"
+           class="btn btn-sm @(Model.Filter == "week" ? "btn-primary" : "btn-outline-primary") mx-1">This Week</a>
+
+        <a asp-action="Index" asp-route-filter="month"
+           class="btn btn-sm @(Model.Filter == "month" ? "btn-primary" : "btn-outline-primary") mx-1">This Month</a>
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>@Model.TotalUsers</h3>
+                    <p>Users</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-pie-graph"></i>
+                </div>
+                <a asp-controller="Admin" asp-action="UserList" class="small-box-footer">More info <i
+                    class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>@Model.ConversionRate.ToString("0")<sup>%</sup></h3>
+                        <p>Lead Conversion Rate</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+                    <a asp-controller="lead" asp-action="Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@Model.TotalContacts</h3>
+                        <p>Contacts</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+                    <a asp-controller="contact" asp-action="Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>@Model.TotalCompanies</h3>
+                        <p>Companies</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+                    <a asp-controller="company" asp-action="Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <canvas id="leadsChart"></canvas>
+            </div>
+
+            <div class="col-md-6">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const labels = @Html.Raw(Json.Serialize(Model.Labels));
+        const leadsData = @Html.Raw(Json.Serialize(Model.LeadsData));
+        const revenueData = @Html.Raw(Json.Serialize(Model.RevenueData));
+
+        new Chart(document.getElementById('leadsChart'), {
+        type: 'line',
+        data: {
+        labels: labels,
+        datasets: [{
+        label: 'Leads',
+        data: leadsData,
+        tension: 0.3
+        }]
+        }
+        });
+
+        new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+        labels: labels,
+        datasets: [{
+        label: 'Revenue',
+        data: revenueData
+        }]
+        }
+        });
+    </script>
